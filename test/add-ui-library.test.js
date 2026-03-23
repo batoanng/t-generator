@@ -106,6 +106,29 @@ test("prompt-based add can select the ui-library feature", async () => {
   ]);
 });
 
+test("ui-library can be added after bff without re-running bff checks", async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp("stacked-features");
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .withArguments(["bff"])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .withArguments(["ui-library"])
+    .run();
+
+  const packageJson = readJson(path.join(projectRoot, "package.json"));
+
+  yoAssert.file([
+    path.join(projectRoot, "server/package.json"),
+    path.join(projectRoot, "src/widgets/ui-library-showcase/index.ts"),
+  ]);
+  assert.equal(packageJson.scripts["dev:full"], 'concurrently -k -n client,server "npm run dev:client" "npm run dev:server"');
+  assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
+});
+
 test("fails when ui-library is generated outside the t-generator base app", async () => {
   let tmpDir;
   const helpers = await createHelpers();

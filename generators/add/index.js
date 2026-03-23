@@ -151,7 +151,7 @@ module.exports = class AddGenerator extends Generator {
     this.projectRoot = this.destinationRoot();
     this.packageJsonPath = this.destinationPath("package.json");
     this.envExamplePath = this.destinationPath(".env.example");
-    this.rootPackageJson = this.validateBaseApp();
+    this.rootPackageJson = this._validateBaseApp();
     this.appName = String(
       this.rootPackageJson.name || path.basename(this.projectRoot) || "app",
     );
@@ -165,16 +165,16 @@ module.exports = class AddGenerator extends Generator {
     };
 
     if (this.featureName === "bff") {
-      this.validateBffPrerequisites();
+      this._validateBffPrerequisites();
       return;
     }
 
     if (this.featureName === "ui-library") {
-      this.validateUiLibraryPrerequisites();
+      this._validateUiLibraryPrerequisites();
     }
   }
 
-  validateBaseApp() {
+  _validateBaseApp() {
     const featureLabel = getFeatureLabel(this.featureName);
 
     if (!fs.existsSync(this.packageJsonPath)) {
@@ -219,7 +219,7 @@ module.exports = class AddGenerator extends Generator {
     return packageJson;
   }
 
-  validateBffPrerequisites() {
+  _validateBffPrerequisites() {
     if (fs.existsSync(this.destinationPath("server"))) {
       throw new Error(
         'BFF generation aborted because "server/" already exists.',
@@ -237,7 +237,7 @@ module.exports = class AddGenerator extends Generator {
     }
   }
 
-  validateUiLibraryPrerequisites() {
+  _validateUiLibraryPrerequisites() {
     if (
       typeof this.rootPackageJson.dependencies?.["@batoanng/mui-components"] ===
         "string" ||
@@ -287,16 +287,16 @@ module.exports = class AddGenerator extends Generator {
 
   writing() {
     if (this.featureName === "bff") {
-      this.writeBff();
+      this._writeBff();
       return;
     }
 
     if (this.featureName === "ui-library") {
-      this.writeUiLibrary();
+      this._writeUiLibrary();
     }
   }
 
-  writeBff() {
+  _writeBff() {
     const templateFiles = [
       ["bff/server/package.json.ejs", "server/package.json"],
       ["bff/server/server.js.ejs", "server/server.js"],
@@ -336,7 +336,7 @@ module.exports = class AddGenerator extends Generator {
     );
   }
 
-  writeUiLibrary() {
+  _writeUiLibrary() {
     const dependencies = { ...(this.rootPackageJson.dependencies || {}) };
 
     Object.entries(UI_LIBRARY_DEPENDENCIES).forEach(([name, version]) => {
