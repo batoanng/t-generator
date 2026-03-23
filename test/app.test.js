@@ -6,8 +6,12 @@ const yoAssert = require("yeoman-assert");
 
 const generatorPath = path.join(__dirname, "../generators/app");
 const blockedDependencies = [
+  "@batoanng/mui-components",
+  "@emotion/react",
+  "@emotion/styled",
   "@apollo/client",
   "@mui/material",
+  "@mui/icons-material",
   "@reduxjs/toolkit",
   "@tanstack/react-query",
   "vite-plugin-pwa",
@@ -111,6 +115,14 @@ test("generates the base app with the expected project structure", async () => {
   yoAssert.fileContent(
     path.join(projectRoot, "src/pages/home/ui/HomePage.test.tsx"),
     "render(<HomePage />);",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, "README.md"),
+    "yo t-generator:add",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, "README.md"),
+    "@batoanng/mui-components",
   );
 });
 

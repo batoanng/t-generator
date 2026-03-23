@@ -1,0 +1,94 @@
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Button } from '@batoanng/mui-components';
+
+const showcaseCards = [
+  {
+    title: 'Shared components',
+    description:
+      'Buttons from @batoanng/mui-components are ready to use inside the generated app shell.',
+  },
+  {
+    title: 'MUI foundations',
+    description:
+      'ThemeProvider and CssBaseline are already connected so new screens inherit the same design system.',
+  },
+  {
+    title: 'FSD-friendly wiring',
+    description:
+      'The example lives in a widget so future pages can reuse the same UI patterns without rewriting the shell.',
+  },
+];
+
+export function UiLibraryShowcase() {
+  return (
+    <Paper
+      component="section"
+      elevation={0}
+      sx={{
+        borderRadius: 4,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
+        px: { xs: 3, md: 4 },
+        py: { xs: 3, md: 4 },
+      }}
+    >
+      <Stack spacing={3}>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={3}
+          justifyContent="space-between"
+        >
+          <Box maxWidth={560}>
+            <Chip
+              icon={<AutoAwesomeRoundedIcon />}
+              label="ui-library feature"
+              color="primary"
+              variant="outlined"
+              sx={{ alignSelf: 'flex-start' }}
+            />
+            <Typography
+              id="ui-library-showcase-title"
+              component="h2"
+              variant="h4"
+              sx={{ mt: 2, mb: 1 }}
+            >
+              Shared UI, ready to extend
+            </Typography>
+            <Typography color="text.secondary">
+              This generated section demonstrates a MUI-based layout powered by your
+              shared component library, so the app starts with both design tokens and
+              reusable UI already wired in.
+            </Typography>
+          </Box>
+
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignSelf={{ md: 'flex-end' }}
+          >
+            <Button variant="contained">Launch feature work</Button>
+            <Button variant="outlined">Review theme wiring</Button>
+          </Stack>
+        </Stack>
+
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+          {showcaseCards.map((card) => (
+            <Paper
+              key={card.title}
+              variant="outlined"
+              sx={{ flex: 1, borderRadius: 3, px: 2.5, py: 2 }}
+            >
+              <Typography variant="overline" color="primary.main">
+                Generated example
+              </Typography>
+              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>
+                {card.title}
+              </Typography>
+              <Typography color="text.secondary">{card.description}</Typography>
+            </Paper>
+          ))}
+        </Stack>
+      </Stack>
+    </Paper>
+  );
+}

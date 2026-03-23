@@ -101,6 +101,20 @@ test("adds the bff feature to an existing generated base app", async () => {
   );
 });
 
+test("prompts for the feature name when add is run without arguments", async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp("prompted-app");
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .withPrompts({ featureName: "bff" })
+    .run();
+
+  yoAssert.file([
+    path.join(projectRoot, "server/package.json"),
+    path.join(projectRoot, "server/server.js"),
+  ]);
+});
+
 test("fails when bff is generated outside the t-generator base app", async () => {
   let tmpDir;
   const helpers = await createHelpers();

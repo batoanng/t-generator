@@ -1,0 +1,35 @@
+import { Chip, Container, Stack, Typography } from '@mui/material';
+import { env } from '@/shared/config';
+import { UiLibraryShowcase } from '@/widgets/ui-library-showcase';
+
+export function HomePage() {
+  return (
+    <main className="page">
+      <Container maxWidth="lg" className="page__content">
+        <Stack spacing={{ xs: 4, md: 6 }}>
+          <Stack component="section" spacing={2}>
+            <Chip
+              label="Base application"
+              color="primary"
+              variant="outlined"
+              sx={{ alignSelf: 'flex-start' }}
+            />
+            <Typography component="h1" variant="h1">
+              {env.appName}
+            </Typography>
+            <Typography variant="h5" color="text.secondary" maxWidth={720}>
+              React + TypeScript + Vite starter with routing, testing, aliases, and a
+              Feature-Sliced Design foundation.
+            </Typography>
+            <Typography color="text.secondary" maxWidth={720}>
+              The generated UI stack is based on Material UI and
+              {' '}@batoanng/mui-components, so you can extend the app with shared
+              building blocks from your library from the start.
+            </Typography>
+          </Stack>
+          <UiLibraryShowcase />
+        </Stack>
+      </Container>
+    </main>
+  );
+}
