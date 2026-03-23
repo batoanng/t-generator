@@ -14,19 +14,26 @@ The interactive flow currently offers:
 
 - `bff`
 - `ui-library`
+- `auth`
 
 You can also call a feature directly when needed:
 
 ```bash
 yo t-generator:add bff
 yo t-generator:add ui-library
+yo t-generator:add auth
 ```
 
 ## UI
 
 The preferred UI stack for this generator is based on Material UI and
 `@batoanng/mui-components`. The base app stays feature-neutral until you add the
-`ui-library` feature.
+`ui-library` feature, which also owns the generated theme wiring.
+
+## Auth
+
+The `auth` feature adds Auth0 React SDK scaffolding, a generated `/auth` example
+page, and a link to that page from the home screen.
 
 ## Scripts
 

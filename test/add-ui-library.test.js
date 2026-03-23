@@ -80,7 +80,7 @@ test("adds the ui-library feature to an existing generated base app", async () =
   );
   yoAssert.fileContent(
     path.join(projectRoot, "src/pages/home/ui/HomePage.tsx"),
-    "Material UI and",
+    "ui-library feature wires Material UI theme setup",
   );
   yoAssert.fileContent(
     path.join(projectRoot, "src/pages/home/ui/HomePage.tsx"),
@@ -134,6 +134,42 @@ test("ui-library can be added after bff without re-running bff checks", async ()
   ]);
   assert.equal(packageJson.scripts["dev:full"], 'concurrently -k -n client,server "npm run dev:client" "npm run dev:server"');
   assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
+});
+
+test("ui-library can be added after auth without removing auth wiring", async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp("auth-first-ui");
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .withArguments(["auth"])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .withArguments(["ui-library"])
+    .run();
+
+  const packageJson = readJson(path.join(projectRoot, "package.json"));
+
+  assert.equal(packageJson.dependencies["@auth0/auth0-react"], "^2.8.0");
+  assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
+
+  yoAssert.fileContent(
+    path.join(projectRoot, "src/app/providers/AppProviders.tsx"),
+    "Auth0ProviderWithNavigate",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, "src/app/providers/AppProviders.tsx"),
+    "createDefaultTheme({})",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, "src/app/routes/AppRouter.tsx"),
+    'path="/auth"',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, "src/pages/home/ui/HomePage.tsx"),
+    'to="/auth"',
+  );
 });
 
 test("fails when ui-library is generated outside the t-generator base app", async () => {
@@ -198,6 +234,6 @@ test("fails clearly for unknown feature names", async () => {
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
       .withArguments(["theme"])
       .run(),
-    /Supported features: bff, ui-library/,
+    /Supported features: bff, ui-library, auth/,
   );
 });

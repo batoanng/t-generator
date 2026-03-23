@@ -10,6 +10,7 @@ const blockedDependencies = [
   "@emotion/react",
   "@emotion/styled",
   "@apollo/client",
+  "@auth0/auth0-react",
   "@mui/material",
   "@mui/icons-material",
   "@reduxjs/toolkit",
@@ -122,7 +123,7 @@ test("generates the base app with the expected project structure", async () => {
   );
   yoAssert.fileContent(
     path.join(projectRoot, "README.md"),
-    "@batoanng/mui-components",
+    "yo t-generator:add auth",
   );
 });
 

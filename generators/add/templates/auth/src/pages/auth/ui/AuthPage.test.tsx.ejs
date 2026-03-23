@@ -1,0 +1,23 @@
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
+import { AppProviders } from '@/app/providers';
+import { AuthPage } from './AuthPage';
+
+describe('AuthPage', () => {
+  it('shows setup guidance until Auth0 env values are configured', () => {
+    render(
+      <MemoryRouter>
+        <AppProviders>
+          <AuthPage />
+        </AppProviders>
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: /Connect Auth0/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/VITE_AUTH0_DOMAIN/i)).toBeInTheDocument();
+    expect(screen.getByText(/VITE_AUTH0_CLIENT_ID/i)).toBeInTheDocument();
+  });
+});

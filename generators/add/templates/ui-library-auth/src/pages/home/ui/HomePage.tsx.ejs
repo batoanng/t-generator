@@ -1,4 +1,5 @@
-import { Chip, Container, Stack, Typography } from '@mui/material';
+import { Button, Chip, Container, Stack, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import { env } from '@/shared/config';
 import { UiLibraryShowcase } from '@/widgets/ui-library-showcase';
 
@@ -22,10 +23,15 @@ export function HomePage() {
               Feature-Sliced Design foundation.
             </Typography>
             <Typography color="text.secondary" maxWidth={720}>
-              The ui-library feature wires Material UI theme setup,
-              {' '}@batoanng/mui-components, and shared app-wide styling into the
-              generated shell from the start.
+              The generated UI stack is based on Material UI and
+              {' '}@batoanng/mui-components, so you can extend the app with shared
+              building blocks from your library from the start.
             </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <Button component={RouterLink} to="/auth" variant="contained">
+                Open authentication example
+              </Button>
+            </Stack>
           </Stack>
           <UiLibraryShowcase />
         </Stack>

@@ -2,7 +2,7 @@
 
 `t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
 
-The current implementation covers the base React + TypeScript + Vite scaffold plus two add-on features: `bff` and `ui-library`. The base stays intentionally feature-neutral so projects can opt into backend or UI wiring only when they need it.
+The current implementation covers the base React + TypeScript + Vite scaffold plus three add-on features: `bff`, `ui-library`, and `auth`. The base stays intentionally feature-neutral so projects can opt into backend, UI, and authentication wiring only when they need it.
 
 The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
 
@@ -16,6 +16,7 @@ The current feature commands are:
 yo t-generator:add
 yo t-generator:add bff
 yo t-generator:add ui-library
+yo t-generator:add auth
 ```
 
 ## What the generator creates today
@@ -36,9 +37,10 @@ The base app command currently includes:
 The base command does not install add-on features automatically. The implemented add-ons are:
 
 - `bff`, which creates a top-level `server/` package for API proxying and production frontend serving
-- `ui-library`, which wires Material UI plus `@batoanng/mui-components` into the app shell and adds a showcase section to the home page
+- `ui-library`, which owns the generated MUI theme wiring, integrates `@batoanng/mui-components`, and adds a showcase section to the home page
+- `auth`, which wires the Auth0 React SDK into the app shell, adds an `/auth` example page, and links to it from the home page
 
-The remaining planned features are still pending: theme, auth, React Query, Apollo, Redux, notifications, and PWA support.
+The remaining planned features are still pending: React Query, Apollo, Redux, notifications, and PWA support.
 
 ## UI direction
 
@@ -48,6 +50,21 @@ The preferred UI stack for generated projects is based on:
 - `@batoanng/mui-components`
 
 The `ui-library` feature keeps that setup optional instead of forcing it into every base scaffold. When you add the feature, the generator installs `@batoanng/mui-components` plus its current peer dependency set, wires `ThemeProvider` and `CssBaseline` into `AppProviders`, and generates a main-page example section that uses both MUI layout primitives and your shared library.
+
+`theme` is no longer a separate feature. Theme setup is part of `ui-library`.
+
+## Auth flow
+
+The `auth` feature uses `@auth0/auth0-react`.
+
+When you add it, the generator:
+
+- extends `.env.example` with Auth0 settings
+- adds an Auth0-aware provider wrapper into `AppProviders`
+- creates a public `/auth` page that shows setup guidance until Auth0 values are configured
+- adds a main-page link to open the auth example
+
+`auth` works as a standalone feature and also composes with `ui-library` in either order.
 
 ## Base app architecture
 
@@ -156,12 +173,14 @@ The interactive prompt currently lets you choose between:
 
 - `bff`
 - `ui-library`
+- `auth`
 
 If you prefer the explicit form, these still work:
 
 ```bash
 yo t-generator:add bff
 yo t-generator:add ui-library
+yo t-generator:add auth
 ```
 
 After the BFF files are generated:
@@ -179,7 +198,16 @@ npm install
 npm run dev
 ```
 
-Both add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library` fails clearly if the shared UI package is already installed, if the showcase directory already exists, or if the managed base files no longer match the expected scaffold.
+After the Auth files are generated:
+
+```bash
+npm install
+npm run dev
+```
+
+Then add your Auth0 values in `.env.local` and open `/auth`.
+
+All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library` fails clearly if the shared UI package is already installed, if the showcase directory already exists, or if the managed base or auth-aware files no longer match the expected scaffold. `auth` fails clearly if Auth0 wiring is already present or if the managed base or UI-aware files no longer match the expected scaffold.
 
 ## Local development
 
@@ -242,10 +270,14 @@ The current test suite covers:
 - prompt-based feature selection for `yo t-generator:add`
 - adding the `bff` feature to an existing generated base app
 - adding the `ui-library` feature to an existing generated base app
+- adding the `auth` feature to an existing generated base app
+- composing `ui-library` and `auth` in either order
 - the generated base project structure and files
 - absence of feature-specific dependencies in the base
 - failure when `bff` is added outside the generated base app
 - failure when `ui-library` is added outside the generated base app
+- failure when `auth` is added outside the generated base app
 - failure when `bff` generation would overwrite existing BFF wiring
 - failure when `ui-library` generation would overwrite existing managed UI wiring
+- failure when `auth` generation would overwrite existing managed auth wiring
 - failure on non-empty target directories

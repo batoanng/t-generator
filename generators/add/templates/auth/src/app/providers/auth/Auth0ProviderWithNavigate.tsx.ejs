@@ -1,0 +1,44 @@
+import type { PropsWithChildren } from 'react';
+import { Auth0Provider } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
+import { env } from '@/shared/config';
+
+type AuthRedirectState = {
+  returnTo?: string;
+};
+
+function getAuthorizationParams() {
+  const authorizationParams = {
+    redirect_uri: window.location.origin,
+    audience: undefined,
+  };
+
+  if (env.auth0.audience) {
+    authorizationParams.audience = env.auth0.audience;
+  }
+
+  return authorizationParams;
+}
+
+export function Auth0ProviderWithNavigate({
+  children,
+}: PropsWithChildren) {
+  const navigate = useNavigate();
+
+  if (!env.auth0.isConfigured) {
+    return <>{children}</>;
+  }
+
+  return (
+    <Auth0Provider
+      domain={env.auth0.domain}
+      clientId={env.auth0.clientId}
+      authorizationParams={getAuthorizationParams()}
+      onRedirectCallback={(appState?: AuthRedirectState) => {
+        navigate(appState?.returnTo || '/auth', { replace: true });
+      }}
+    >
+      {children}
+    </Auth0Provider>
+  );
+}

@@ -1,27 +1,30 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { AppProviders } from '@/app/providers';
 import { HomePage } from './HomePage';
 
 describe('HomePage', () => {
-  it('renders the generated UI library content', () => {
+  it('renders the generated UI library content with auth entry points', () => {
     render(
-      <AppProviders>
-        <HomePage />
-      </AppProviders>,
+      <MemoryRouter>
+        <AppProviders>
+          <HomePage />
+        </AppProviders>
+      </MemoryRouter>,
     );
 
     expect(
       screen.getByRole('heading', { name: '<%= appDisplayName %>' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/ui-library feature wires Material UI theme setup/i),
+      screen.getByText(/The generated UI stack is based on Material UI/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /Shared UI, ready to extend/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /Launch feature work/i }),
-    ).toBeInTheDocument();
+      screen.getByRole('link', { name: /Open authentication example/i }),
+    ).toHaveAttribute('href', '/auth');
   });
 });

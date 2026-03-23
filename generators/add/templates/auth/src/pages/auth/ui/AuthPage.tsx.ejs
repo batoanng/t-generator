@@ -1,0 +1,106 @@
+import { useAuth0 } from '@auth0/auth0-react';
+import { Link } from 'react-router-dom';
+import { env } from '@/shared/config';
+
+function AuthSetupGuide() {
+  return (
+    <main className="page">
+      <section className="hero">
+        <p className="eyebrow">Authentication example</p>
+        <h1>Connect Auth0</h1>
+        <p>
+          Add your Auth0 tenant values before testing login and logout flows on this
+          page.
+        </p>
+        <ul>
+          <li>VITE_AUTH0_DOMAIN</li>
+          <li>VITE_AUTH0_CLIENT_ID</li>
+          <li>VITE_AUTH0_AUDIENCE (optional)</li>
+        </ul>
+        <p>
+          Start the dev server after adding the values, then return to this route to
+          try the hosted Auth0 flow.
+        </p>
+        <p>
+          <Link to="/">Back to the main page</Link>
+        </p>
+      </section>
+    </main>
+  );
+}
+
+function ConfiguredAuthPage() {
+  const {
+    error,
+    isAuthenticated,
+    isLoading,
+    loginWithRedirect,
+    logout,
+    user,
+  } = useAuth0();
+
+  return (
+    <main className="page">
+      <section className="hero">
+        <p className="eyebrow">Authentication example</p>
+        <h1>Auth0 is wired into this app</h1>
+        <p>
+          Use this page to test the generated login and logout flow against your
+          Auth0 application.
+        </p>
+
+        {isLoading ? <p>Loading authentication state...</p> : null}
+
+        {error ? (
+          <p>Authentication error: {error.message}</p>
+        ) : null}
+
+        {!isLoading && !error && !isAuthenticated ? (
+          <button
+            type="button"
+            onClick={() =>
+              loginWithRedirect({ appState: { returnTo: '/auth' } })
+            }
+          >
+            Log in with Auth0
+          </button>
+        ) : null}
+
+        {!isLoading && !error && isAuthenticated ? (
+          <>
+            <p>Logged in as {user?.name || user?.email || user?.sub}.</p>
+            <ul>
+              <li>Email: {user?.email || 'Not provided'}</li>
+              <li>Subject: {user?.sub || 'Not provided'}</li>
+            </ul>
+            {user?.picture ? (
+              <img src={user.picture} alt={user.name || 'Authenticated user'} />
+            ) : null}
+            <button
+              type="button"
+              onClick={() =>
+                logout({
+                  logoutParams: { returnTo: window.location.origin },
+                })
+              }
+            >
+              Log out
+            </button>
+          </>
+        ) : null}
+
+        <p>
+          <Link to="/">Back to the main page</Link>
+        </p>
+      </section>
+    </main>
+  );
+}
+
+export function AuthPage() {
+  if (!env.auth0.isConfigured) {
+    return <AuthSetupGuide />;
+  }
+
+  return <ConfiguredAuthPage />;
+}

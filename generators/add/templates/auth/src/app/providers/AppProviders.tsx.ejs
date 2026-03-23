@@ -1,0 +1,6 @@
+import type { PropsWithChildren } from 'react';
+import { Auth0ProviderWithNavigate } from './auth/Auth0ProviderWithNavigate';
+
+export function AppProviders({ children }: PropsWithChildren) {
+  return <Auth0ProviderWithNavigate>{children}</Auth0ProviderWithNavigate>;
+}

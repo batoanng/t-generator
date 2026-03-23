@@ -101,6 +101,8 @@ Recommended default approach:
 - centralized theme provider
 - global app styles
 
+In v1, that theme setup is part of the `ui-library` feature instead of a standalone `theme` feature.
+
 The exact package names can be configurable in implementation, but the first version should optimize for the current preferred stack.
 
 ---
@@ -162,7 +164,7 @@ Example:
 
 ```bash
 yo t-generator:add auth
-yo t-generator:add theme
+yo t-generator:add ui-library
 yo t-generator:add bff
 ```
 
@@ -310,22 +312,22 @@ Optional scripts may be added when relevant to enabled features.
 
 Version 1 should support the following feature generators.
 
-### 9.1 `theme`
+### 9.1 `ui-library`
 
 Purpose:
 
-- add centralized theme setup for the application
+- add the preferred UI stack, including centralized theme wiring, to the application
 
 Responsibilities:
 
-- install theme-related dependencies
-- add a theme provider
-- add base global styles
-- expose a theme creation entry point
-- integrate with the main provider tree
+- install the shared UI package and required peer dependencies
+- wire Material UI theme setup into the app provider tree
+- add base global styles for the generated UI shell
+- provide example usage in a page or widget
 
 Notes:
 
+- `theme` is not a standalone v1 feature. Theme setup is owned by `ui-library`.
 - The first implementation should align with the preferred MUI-based stack.
 
 ### 9.2 `bff`
@@ -357,42 +359,29 @@ Notes:
 - The example project's `server/` folder is the reference shape for this feature.
 - The generator must fail clearly if the base app markers are missing or if existing BFF wiring would be overwritten.
 
-### 9.3 `ui-library`
+### 9.3 `auth`
 
 Purpose:
 
-- integrate the author's UI package into the project
+- add Auth0-based authentication scaffolding for the generated SPA
 
 Responsibilities:
 
-- install the package and peer dependencies
-- wire it into the app theme and provider setup
-- provide example usage in a page or shared component
+- install `@auth0/auth0-react`
+- create an Auth0-aware provider wrapper
+- add environment variables required for Auth0
+- add a generated `/auth` example page
+- add a main-page link to open the auth example
+- provide a basic authenticated and unauthenticated flow
+- validate existing managed files before writing auth changes
 
 Notes:
 
-- This feature is intentionally separate from `theme` so projects can choose theme setup without necessarily adopting the custom package, or vice versa if needed.
+- The first implementation targets the Auth0 React SDK.
+- The `/auth` page should show setup guidance until required Auth0 values are configured.
+- The feature should work on the base app and also compose with `ui-library` in either order.
 
-### 9.4 `auth`
-
-Purpose:
-
-- add authentication and authorization scaffolding
-
-Responsibilities:
-
-- install auth dependencies
-- create an auth provider
-- add callback handling
-- add route guard utilities
-- add environment variables required for auth
-- provide a basic authenticated/unauthenticated flow
-
-Notes:
-
-- The first implementation may target the current preferred provider, but the spec should keep room for future auth adapters.
-
-### 9.5 `react-query`
+### 9.4 `react-query`
 
 Purpose:
 
@@ -405,7 +394,7 @@ Responsibilities:
 - wire the provider into the app
 - add a small example query hook or sample usage
 
-### 9.6 `apollo`
+### 9.5 `apollo`
 
 Purpose:
 
@@ -422,7 +411,7 @@ Notes:
 
 - This feature should work independently, but offer integration points with `auth`.
 
-### 9.7 `redux`
+### 9.6 `redux`
 
 Purpose:
 
@@ -435,7 +424,7 @@ Responsibilities:
 - create an example slice
 - wire the store provider into the app
 
-### 9.8 `notifications`
+### 9.7 `notifications`
 
 Purpose:
 
@@ -447,7 +436,7 @@ Responsibilities:
 - create a provider wrapper
 - expose basic success/error notification helpers
 
-### 9.9 `pwa`
+### 9.8 `pwa`
 
 Purpose:
 
@@ -479,8 +468,8 @@ Feature generators should compose cleanly.
 ### Example interactions
 
 - `auth` may integrate with `apollo`
-- `theme` may be required by `ui-library`
-- `notifications` may extend the provider tree created by `theme`
+- `ui-library` and `auth` must compose without a required order
+- `notifications` may extend the provider tree created by `ui-library`
 - `bff` may add scripts without disrupting existing frontend scripts
 
 ---
@@ -503,8 +492,8 @@ Each feature should define its own minimal testing expectations.
 
 Examples:
 
-- `theme`: render with provider
-- `auth`: route guard or provider smoke test
+- `ui-library`: render with provider
+- `auth`: provider and `/auth` page smoke test
 - `react-query`: query client wrapper test
 - `redux`: store or slice smoke test
 - `bff`: server boot or config smoke test where practical
@@ -557,9 +546,8 @@ The first implementation pass should prioritize:
 
 1. base app
 2. bff
-3. theme
-4. ui-library
-5. auth
-6. react-query
+3. ui-library
+4. auth
+5. react-query
 
 The remaining features can follow after the core generation flow is stable.
