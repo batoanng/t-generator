@@ -507,6 +507,16 @@ Examples:
 - `redux`: store or slice smoke test
 - `bff`: server boot or config smoke test where practical
 
+### Repository CI
+
+The generator repository itself must run automated test validation in GitHub Actions for every new commit pushed to GitHub and for pull requests.
+
+At minimum, the workflow should:
+
+- install dependencies with `npm ci`
+- run the repository test suite with `npm test`
+- fail the workflow when tests fail so regressions are visible before merge
+
 ---
 
 ## 12. Idempotency and update behavior
