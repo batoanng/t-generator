@@ -47,7 +47,7 @@ The preferred UI stack for generated projects is based on:
 - Material UI
 - `@batoanng/mui-components`
 
-The `ui-library` feature keeps that setup optional instead of forcing it into every base scaffold. When you add the feature, the generator installs the minimal MUI peer set, wires `ThemeProvider` and `CssBaseline` into `AppProviders`, and generates a main-page example section that uses both MUI layout primitives and your shared library.
+The `ui-library` feature keeps that setup optional instead of forcing it into every base scaffold. When you add the feature, the generator installs `@batoanng/mui-components` plus its current peer dependency set, wires `ThemeProvider` and `CssBaseline` into `AppProviders`, and generates a main-page example section that uses both MUI layout primitives and your shared library.
 
 ## Base app architecture
 

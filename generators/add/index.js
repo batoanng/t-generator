@@ -53,6 +53,13 @@ const UI_LIBRARY_DEPENDENCIES = {
   "@emotion/styled": "^11.13.5",
   "@mui/icons-material": "6.1.8",
   "@mui/material": "6.1.8",
+  "@mui/utils": "^6.1.8",
+  "@mui/x-date-pickers": "7.22.2",
+  "framer-motion": "^12.23.24",
+  "react-dropzone": "^14.2.3",
+  "react-easy-crop": "^5.0.2",
+  "react-hook-form": "7.44.3",
+  "react-idle-timer": "^5.7.2",
 };
 const UI_LIBRARY_MANAGED_DIRECTORY = "src/widgets/ui-library-showcase";
 

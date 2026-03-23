@@ -60,6 +60,13 @@ test("adds the ui-library feature to an existing generated base app", async () =
   assert.equal(packageJson.dependencies["@emotion/styled"], "^11.13.5");
   assert.equal(packageJson.dependencies["@mui/icons-material"], "6.1.8");
   assert.equal(packageJson.dependencies["@mui/material"], "6.1.8");
+  assert.equal(packageJson.dependencies["@mui/utils"], "^6.1.8");
+  assert.equal(packageJson.dependencies["@mui/x-date-pickers"], "7.22.2");
+  assert.equal(packageJson.dependencies["framer-motion"], "^12.23.24");
+  assert.equal(packageJson.dependencies["react-dropzone"], "^14.2.3");
+  assert.equal(packageJson.dependencies["react-easy-crop"], "^5.0.2");
+  assert.equal(packageJson.dependencies["react-hook-form"], "7.44.3");
+  assert.equal(packageJson.dependencies["react-idle-timer"], "^5.7.2");
   assert.equal(packageJson.scripts["dev:full"], undefined);
   assert.equal(packageJson.devDependencies?.concurrently, undefined);
 
