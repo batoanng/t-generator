@@ -328,7 +328,36 @@ Notes:
 
 - The first implementation should align with the preferred MUI-based stack.
 
-### 9.2 `ui-library`
+### 9.2 `bff`
+
+Purpose:
+
+- add a lightweight backend-for-frontend server folder to support proxying and production serving
+
+Responsibilities:
+
+- create a top-level `server/` folder
+- add a server package manifest
+- add a server entry file
+- add environment file examples for the server
+- configure the server to proxy API requests to a target backend
+- optionally serve the built frontend in production
+- add root scripts to run frontend and server together in development
+- validate that the target project already contains the generated base app before writing any BFF files
+
+Non-responsibilities:
+
+- no database setup
+- no domain-specific backend business logic
+- no full API generation
+
+Notes:
+
+- This feature exists to support frontend delivery concerns such as CORS avoidance, proxying, and static asset serving.
+- The example project's `server/` folder is the reference shape for this feature.
+- The generator must fail clearly if the base app markers are missing or if existing BFF wiring would be overwritten.
+
+### 9.3 `ui-library`
 
 Purpose:
 
@@ -344,7 +373,7 @@ Notes:
 
 - This feature is intentionally separate from `theme` so projects can choose theme setup without necessarily adopting the custom package, or vice versa if needed.
 
-### 9.3 `auth`
+### 9.4 `auth`
 
 Purpose:
 
@@ -363,7 +392,7 @@ Notes:
 
 - The first implementation may target the current preferred provider, but the spec should keep room for future auth adapters.
 
-### 9.4 `react-query`
+### 9.5 `react-query`
 
 Purpose:
 
@@ -376,7 +405,7 @@ Responsibilities:
 - wire the provider into the app
 - add a small example query hook or sample usage
 
-### 9.5 `apollo`
+### 9.6 `apollo`
 
 Purpose:
 
@@ -393,7 +422,7 @@ Notes:
 
 - This feature should work independently, but offer integration points with `auth`.
 
-### 9.6 `redux`
+### 9.7 `redux`
 
 Purpose:
 
@@ -406,7 +435,7 @@ Responsibilities:
 - create an example slice
 - wire the store provider into the app
 
-### 9.7 `notifications`
+### 9.8 `notifications`
 
 Purpose:
 
@@ -418,7 +447,7 @@ Responsibilities:
 - create a provider wrapper
 - expose basic success/error notification helpers
 
-### 9.8 `pwa`
+### 9.9 `pwa`
 
 Purpose:
 
@@ -429,33 +458,6 @@ Responsibilities:
 - configure service worker support
 - add install/update hooks or components
 - configure manifest and required assets scaffolding
-
-### 9.9 `bff`
-
-Purpose:
-
-- add a lightweight backend-for-frontend server folder to support proxying and production serving
-
-Responsibilities:
-
-- create a top-level `server/` folder
-- add a server package manifest
-- add a server entry file
-- add environment file examples for the server
-- configure the server to proxy API requests to a target backend
-- optionally serve the built frontend in production
-- add root scripts to run frontend and server together in development
-
-Non-responsibilities:
-
-- no database setup
-- no domain-specific backend business logic
-- no full API generation
-
-Notes:
-
-- This feature exists to support frontend delivery concerns such as CORS avoidance, proxying, and static asset serving.
-- The example project's `server/` folder is the reference shape for this feature.
 
 ---
 
@@ -554,10 +556,10 @@ Requirements:
 The first implementation pass should prioritize:
 
 1. base app
-2. theme
-3. ui-library
-4. auth
-5. react-query
-6. bff
+2. bff
+3. theme
+4. ui-library
+5. auth
+6. react-query
 
 The remaining features can follow after the core generation flow is stable.

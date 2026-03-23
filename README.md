@@ -1,8 +1,8 @@
 # t-generator
 
-`t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point.
+`t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
 
-The current implementation focuses on the first command in the product spec: generating a base React + TypeScript + Vite application. The base is intentionally feature-neutral. It gives a project the core structure, routing, testing, linting, formatting, and environment wiring needed to start development without pulling in optional concerns too early.
+The current implementation covers the base React + TypeScript + Vite scaffold plus the first add-on feature command: `bff`. The base stays intentionally feature-neutral so projects can opt into the BFF only when they need proxying and production serving support.
 
 The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
 
@@ -10,9 +10,15 @@ The long-term direction is described in [SPECS.md](./SPECS.md). The first implem
 yo t-generator [appName]
 ```
 
+The first implemented feature command is:
+
+```bash
+yo t-generator:add bff
+```
+
 ## What the generator creates today
 
-The base app currently includes:
+The base app command currently includes:
 
 - React + TypeScript via Vite
 - ESLint configuration
@@ -25,7 +31,7 @@ The base app currently includes:
 - Vitest + Testing Library setup
 - a Feature-Sliced Design directory structure
 
-The base does not install any of the planned add-on features yet. In particular, it does not include theme setup, a UI library, auth, React Query, Apollo, Redux, notifications, PWA support, or a BFF server.
+The base command does not install add-on features automatically. The first implemented add-on is `bff`, which creates a top-level `server/` package for API proxying and production frontend serving. The remaining planned features are still pending: theme, UI library, auth, React Query, Apollo, Redux, notifications, and PWA support.
 
 ## Base app architecture
 
@@ -123,6 +129,23 @@ npm install
 npm run dev
 ```
 
+Add the BFF feature from the generated app root:
+
+```bash
+cd my-app
+yo t-generator:add bff
+```
+
+After the BFF files are generated:
+
+```bash
+npm install
+npm --prefix server install
+npm run dev:full
+```
+
+The BFF command validates that the current directory already contains the generated base app before it writes anything. It will fail clearly if the base markers are missing or if a `server/` folder already exists.
+
 ## Local development
 
 Work on the generator itself from this repository:
@@ -137,6 +160,40 @@ Run the test suite:
 npm test
 ```
 
+Create a changeset for release-worthy changes:
+
+```bash
+npm run changeset
+```
+
+Apply pending changesets to the package version and changelog:
+
+```bash
+npm run version-packages
+```
+
+Publish the package after versioning:
+
+```bash
+npm run release
+```
+
+## Release automation
+
+This repository now uses Changesets on `main` through GitHub Actions.
+
+Setup for the easiest token-based publish flow:
+
+1. In npm, create a write-capable access token for this package.
+2. In GitHub, add that token as the repository Actions secret `NPM_TOKEN`.
+3. Merge changes that include a changeset into `main`.
+
+What happens next:
+
+- the release workflow opens or updates a Changesets release PR on `main`
+- when that release PR is merged, the same workflow publishes the package to npm automatically
+- `GITHUB_TOKEN` is provided by GitHub automatically, so you only need to manage `NPM_TOKEN`
+
 Re-link the generator after local changes if needed:
 
 ```bash
@@ -147,6 +204,9 @@ The current test suite covers:
 
 - generation with an explicit app name
 - prompt fallback when the name is omitted
+- adding the `bff` feature to an existing generated base app
 - the generated base project structure and files
 - absence of feature-specific dependencies in the base
+- failure when `bff` is added outside the generated base app
+- failure when `bff` generation would overwrite existing BFF wiring
 - failure on non-empty target directories
