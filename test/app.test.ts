@@ -20,11 +20,13 @@ const blockedDependencies = [
   '@mui/icons-material',
   '@reduxjs/toolkit',
   '@tanstack/react-query',
+  '@tanstack/react-query-devtools',
   'react-redux',
   'redux',
   'redux-immutable-state-invariant',
   'redux-logger',
   'redux-persist',
+  'axios',
   'vite-plugin-pwa',
   'notistack',
 ];
@@ -108,6 +110,10 @@ test('generates the base app with the expected project structure', async () => {
     false,
   );
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/pages/redux')), false);
+  assert.equal(
+    fs.existsSync(path.join(projectRoot, 'src/pages/react-query')),
+    false,
+  );
 
   yoAssert.fileContent(
     path.join(projectRoot, 'src/shared/config/env.ts'),
@@ -119,7 +125,7 @@ test('generates the base app with the expected project structure', async () => {
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/pages/home/ui/HomePage.test.tsx'),
-    'render(<HomePage />);',
+    '<AppProviders>',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
@@ -132,6 +138,10 @@ test('generates the base app with the expected project structure', async () => {
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
     'yo t-generator:add redux',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'README.md'),
+    'yo t-generator:add react-query',
   );
 });
 

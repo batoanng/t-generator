@@ -19,6 +19,7 @@ The interactive flow currently offers, in order:
 - `ui-library`
 - `auth`
 - `redux`
+- `react-query`
 
 You can also call a feature directly when needed:
 
@@ -27,6 +28,7 @@ yo t-generator:add bff
 yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
+yo t-generator:add react-query
 ```
 
 ## UI
@@ -46,6 +48,12 @@ The `redux` feature adds a persisted Redux Toolkit store, typed React Redux
 hooks, and a generated `/redux` example route linked from the home screen. The
 store layout follows the repo's example app structure while staying inside the
 generated app's FSD-oriented `app` layer.
+
+## React Query
+
+The `react-query` feature adds a shared QueryClient, React Query Devtools,
+Axios-based API helpers, generic `useApiQuery` and `useApiMutation` wrappers,
+and a generated `/react-query` example route linked from the home screen.
 
 ## Scripts
 

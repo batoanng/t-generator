@@ -1,0 +1,4 @@
+// Replace this example transform with your real payload decoding logic when needed.
+export async function decryptData<T>(payload: string): Promise<T> {
+  return JSON.parse(payload) as T;
+}

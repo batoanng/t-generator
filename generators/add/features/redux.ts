@@ -1,205 +1,7 @@
 import fs from 'node:fs';
 
-import type { ManagedFile } from '../../lib/types';
-import { FEATURE_STATES, type FeatureState } from '../lib/constants';
-import {
-  addManagedFile,
-  appManagedFile,
-  hasPackageDependency,
-} from '../lib/helpers';
+import { addManagedFile, hasPackageDependency } from '../lib/helpers';
 import type { FeatureDefinition } from '../lib/types';
-
-const REDUX_MANAGED_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
-  [FEATURE_STATES.base]: [
-    appManagedFile('.env.example', '_env.example.ejs'),
-    appManagedFile('src/vite-env.d.ts', 'src/vite-env.d.ts.ejs'),
-    appManagedFile('src/shared/config/env.ts', 'src/shared/config/env.ts.ejs'),
-    appManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'src/app/providers/AppProviders.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'src/app/routes/AppRouter.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.auth]: [
-    addManagedFile('.env.example', 'auth/_env.example.ejs'),
-    addManagedFile('src/vite-env.d.ts', 'auth/src/vite-env.d.ts.ejs'),
-    addManagedFile(
-      'src/shared/config/env.ts',
-      'auth/src/shared/config/env.ts.ejs',
-    ),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'auth/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'auth/src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'auth/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'auth/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.uiLibrary]: [
-    appManagedFile('.env.example', '_env.example.ejs'),
-    appManagedFile('src/vite-env.d.ts', 'src/vite-env.d.ts.ejs'),
-    appManagedFile('src/shared/config/env.ts', 'src/shared/config/env.ts.ejs'),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.uiLibraryAuth]: [
-    addManagedFile('.env.example', 'auth/_env.example.ejs'),
-    addManagedFile('src/vite-env.d.ts', 'auth/src/vite-env.d.ts.ejs'),
-    addManagedFile(
-      'src/shared/config/env.ts',
-      'auth/src/shared/config/env.ts.ejs',
-    ),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library-auth/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'auth/src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library-auth/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library-auth/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-};
-
-const REDUX_OUTPUT_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
-  [FEATURE_STATES.base]: [
-    addManagedFile('.env.example', 'redux/_env.example.ejs'),
-    addManagedFile('src/vite-env.d.ts', 'redux/src/vite-env.d.ts.ejs'),
-    addManagedFile(
-      'src/shared/config/env.ts',
-      'redux/src/shared/config/env.ts.ejs',
-    ),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'redux/src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.auth]: [
-    addManagedFile('.env.example', 'auth-redux/_env.example.ejs'),
-    addManagedFile('src/vite-env.d.ts', 'auth-redux/src/vite-env.d.ts.ejs'),
-    addManagedFile(
-      'src/shared/config/env.ts',
-      'auth-redux/src/shared/config/env.ts.ejs',
-    ),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'auth-redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'auth-redux/src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'auth-redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'auth-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.uiLibrary]: [
-    addManagedFile('.env.example', 'redux/_env.example.ejs'),
-    addManagedFile('src/vite-env.d.ts', 'redux/src/vite-env.d.ts.ejs'),
-    addManagedFile(
-      'src/shared/config/env.ts',
-      'redux/src/shared/config/env.ts.ejs',
-    ),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library-redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'redux/src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library-redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.uiLibraryAuth]: [
-    addManagedFile('.env.example', 'auth-redux/_env.example.ejs'),
-    addManagedFile('src/vite-env.d.ts', 'auth-redux/src/vite-env.d.ts.ejs'),
-    addManagedFile(
-      'src/shared/config/env.ts',
-      'auth-redux/src/shared/config/env.ts.ejs',
-    ),
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library-auth-redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/routes/AppRouter.tsx',
-      'auth-redux/src/app/routes/AppRouter.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library-auth-redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library-auth-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-};
 
 const REDUX_NEW_FILES = [
   addManagedFile('src/app/store/index.ts', 'redux/src/app/store/index.ts.ejs'),
@@ -285,32 +87,16 @@ const reduxFeature: FeatureDefinition = {
       );
     }
 
-    const managedFiles = REDUX_MANAGED_FILES[generator.projectState];
-
-    if (!managedFiles) {
-      throw new Error(
-        `Redux generation aborted because the current project state "${generator.projectState}" is not supported.`,
-      );
-    }
-
-    generator._validateManagedFiles(
-      'Redux',
-      managedFiles,
-      generator.projectState,
-    );
+    generator._validateSharedScaffold('Redux', generator.installedFeatures);
   },
   write(generator) {
-    const outputFiles = REDUX_OUTPUT_FILES[generator.projectState];
-
-    if (!outputFiles) {
-      throw new Error(
-        `Redux generation aborted because the current project state "${generator.projectState}" is not supported.`,
-      );
-    }
-
     generator._writeDependencies(REDUX_DEPENDENCIES);
     generator._writeDevDependencies(REDUX_DEV_DEPENDENCIES);
-    generator._writeManagedFiles([...outputFiles, ...REDUX_NEW_FILES]);
+    generator._writeSharedScaffold({
+      ...generator.installedFeatures,
+      redux: true,
+    });
+    generator._writeManagedFiles(REDUX_NEW_FILES);
   },
   end(generator) {
     generator.log('Redux feature scaffolded in "./src/app/store".');

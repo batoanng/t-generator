@@ -1,165 +1,18 @@
 import fs from 'node:fs';
 
-import type { ManagedFile } from '../../lib/types';
-import { FEATURE_STATES, type FeatureState } from '../lib/constants';
-import {
-  addManagedFile,
-  appManagedFile,
-  hasPackageDependency,
-} from '../lib/helpers';
+import { addManagedFile, appManagedFile, hasPackageDependency } from '../lib/helpers';
 import type { FeatureDefinition } from '../lib/types';
 
-const UI_LIBRARY_MANAGED_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
-  [FEATURE_STATES.base]: [
-    appManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'src/app/providers/AppProviders.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/app/styles/global.css',
-      'src/app/styles/global.css.ejs',
-    ),
-    appManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.redux]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/app/styles/global.css',
-      'src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.auth]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'auth/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/app/styles/global.css',
-      'src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'auth/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'auth/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.authRedux]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'auth-redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    appManagedFile(
-      'src/app/styles/global.css',
-      'src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'auth-redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'auth-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-};
-
-const UI_LIBRARY_OUTPUT_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
-  [FEATURE_STATES.base]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/styles/global.css',
-      'ui-library/src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.redux]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library-redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/styles/global.css',
-      'ui-library/src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library-redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.auth]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library-auth/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/styles/global.css',
-      'ui-library/src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library-auth/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library-auth/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-  [FEATURE_STATES.authRedux]: [
-    addManagedFile(
-      'src/app/providers/AppProviders.tsx',
-      'ui-library-auth-redux/src/app/providers/AppProviders.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/app/styles/global.css',
-      'ui-library/src/app/styles/global.css.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.tsx',
-      'ui-library-auth-redux/src/pages/home/ui/HomePage.tsx.ejs',
-    ),
-    addManagedFile(
-      'src/pages/home/ui/HomePage.test.tsx',
-      'ui-library-auth-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
-    ),
-  ],
-};
+const UI_LIBRARY_GLOBAL_STYLE_FILE = appManagedFile(
+  'src/app/styles/global.css',
+  'src/app/styles/global.css.ejs',
+);
 
 const UI_LIBRARY_NEW_FILES = [
+  addManagedFile(
+    'src/app/styles/global.css',
+    'ui-library/src/app/styles/global.css.ejs',
+  ),
   addManagedFile(
     'src/widgets/ui-library-showcase/index.ts',
     'ui-library/src/widgets/ui-library-showcase/index.ts.ejs',
@@ -214,31 +67,20 @@ const uiLibraryFeature: FeatureDefinition = {
       );
     }
 
-    const managedFiles = UI_LIBRARY_MANAGED_FILES[generator.projectState];
-
-    if (!managedFiles) {
-      throw new Error(
-        `UI library generation aborted because the current project state "${generator.projectState}" is not supported.`,
-      );
-    }
-
+    generator._validateSharedScaffold('UI library', generator.installedFeatures);
     generator._validateManagedFiles(
       'UI library',
-      managedFiles,
-      generator.projectState,
+      [UI_LIBRARY_GLOBAL_STYLE_FILE],
+      'base styles',
     );
   },
   write(generator) {
-    const outputFiles = UI_LIBRARY_OUTPUT_FILES[generator.projectState];
-
-    if (!outputFiles) {
-      throw new Error(
-        `UI library generation aborted because the current project state "${generator.projectState}" is not supported.`,
-      );
-    }
-
     generator._writeDependencies(UI_LIBRARY_DEPENDENCIES);
-    generator._writeManagedFiles([...outputFiles, ...UI_LIBRARY_NEW_FILES]);
+    generator._writeSharedScaffold({
+      ...generator.installedFeatures,
+      uiLibrary: true,
+    });
+    generator._writeManagedFiles(UI_LIBRARY_NEW_FILES);
   },
   end(generator) {
     generator.log(

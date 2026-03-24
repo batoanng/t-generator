@@ -2,7 +2,7 @@
 
 `t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
 
-The current implementation covers the base React + TypeScript + Vite scaffold plus four add-on features: `bff`, `ui-library`, `auth`, and `redux`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, and client-state wiring only when they need it.
+The current implementation covers the base React + TypeScript + Vite scaffold plus five add-on features: `bff`, `ui-library`, `auth`, `redux`, and `react-query`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, client-state, and async-data wiring only when they need it.
 
 The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
 
@@ -18,6 +18,7 @@ yo t-generator:add bff
 yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
+yo t-generator:add react-query
 ```
 
 ## What the generator creates today
@@ -41,8 +42,9 @@ The base command does not install add-on features automatically. The implemented
 - `ui-library`, which owns the generated MUI theme wiring, integrates `@batoanng/mui-components`, and adds a showcase section to the home page
 - `auth`, which wires the Auth0 React SDK into the app shell, adds an `/auth` example page, and links to it from the home page
 - `redux`, which wires a persisted Redux Toolkit store into the app shell, adds a `/redux` example page, and links to it from the home page
+- `react-query`, which wires a shared QueryClient and Axios-based data helpers into the app shell, adds a `/react-query` example page, and links to it from the home page
 
-The remaining planned features are still pending: React Query, Apollo, notifications, and PWA support.
+The remaining planned features are still pending: Apollo, notifications, and PWA support.
 
 ## UI direction
 
@@ -81,6 +83,20 @@ When you add it, the generator:
 - adds a main-page link to open the Redux example
 
 `redux` works as a standalone feature and also composes with `auth` and `ui-library` in either order.
+
+## React Query flow
+
+The `react-query` feature uses `@tanstack/react-query`, React Query Devtools, and Axios.
+
+When you add it, the generator:
+
+- extends `.env.example` with `VITE_API_BASE_URL=/api`
+- adds a shared Axios client and QueryClient under `src/shared/api`
+- exports generic `useApiQuery` and `useApiMutation` wrappers for feature-level hooks
+- creates a public `/react-query` page that documents the generated setup and example hooks
+- adds a main-page link to open the React Query example
+
+`react-query` works as a standalone feature and also composes with `auth`, `redux`, and `ui-library` in either order.
 
 ## Base app architecture
 
@@ -194,6 +210,7 @@ The interactive prompt currently lets you choose between, in order:
 - `ui-library`
 - `auth`
 - `redux`
+- `react-query`
 
 If you prefer the explicit form, these still work:
 
@@ -202,6 +219,7 @@ yo t-generator:add bff
 yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
+yo t-generator:add react-query
 ```
 
 After the BFF files are generated:
@@ -237,7 +255,16 @@ npm run dev
 
 Then open `/redux`.
 
-All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library` fails clearly if the shared UI package is already installed, if the showcase directory already exists, or if the managed base, auth-aware, or Redux-aware files no longer match the expected scaffold. `auth` fails clearly if Auth0 wiring is already present or if the managed base, UI-aware, or Redux-aware files no longer match the expected scaffold. `redux` fails clearly if Redux wiring is already present or if the managed base, auth-aware, or UI-aware files no longer match the expected scaffold.
+After the React Query files are generated:
+
+```bash
+npm install
+npm run dev
+```
+
+Then open `/react-query`.
+
+All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, and `react-query` also validate that the shared managed app shell still matches the expected composed scaffold before they rewrite providers, routes, env helpers, and home-page content.
 
 ## Local development
 
@@ -316,13 +343,20 @@ The current test suite covers:
 - adding the `bff` feature to an existing generated base app
 - adding the `ui-library` feature to an existing generated base app
 - adding the `auth` feature to an existing generated base app
+- adding the `redux` feature to an existing generated base app
+- adding the `react-query` feature to an existing generated base app
 - composing `ui-library` and `auth` in either order
+- composing `redux` and `react-query` with `auth` and `ui-library` in either order
 - the generated base project structure and files
 - absence of feature-specific dependencies in the base
 - failure when `bff` is added outside the generated base app
 - failure when `ui-library` is added outside the generated base app
 - failure when `auth` is added outside the generated base app
+- failure when `redux` is added outside the generated base app
+- failure when `react-query` is added outside the generated base app
 - failure when `bff` generation would overwrite existing BFF wiring
 - failure when `ui-library` generation would overwrite existing managed UI wiring
 - failure when `auth` generation would overwrite existing managed auth wiring
+- failure when `redux` generation would overwrite existing managed Redux wiring
+- failure when `react-query` generation would overwrite existing managed React Query wiring
 - failure on non-empty target directories

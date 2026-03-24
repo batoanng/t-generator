@@ -6,14 +6,10 @@ import GeneratorBase from 'yeoman-generator';
 import type { PackageJson } from '../lib/types';
 import authFeature from './features/auth';
 import bffFeature from './features/bff';
+import reactQueryFeature from './features/react-query';
 import reduxFeature from './features/redux';
 import uiLibraryFeature from './features/ui-library';
-import {
-  FEATURE_STATES,
-  type FeatureState,
-  REQUIRED_BASE_FILES,
-  REQUIRED_BASE_SCRIPTS,
-} from './lib/constants';
+import { REQUIRED_BASE_FILES, REQUIRED_BASE_SCRIPTS } from './lib/constants';
 import {
   normalizeFeatureName,
   normalizeLineEndings,
@@ -23,7 +19,11 @@ import {
   resolveTemplateAbsolutePath,
   toDisplayName,
 } from './lib/helpers';
-import type { FeatureDefinition } from './lib/types';
+import { buildSharedScaffold } from './lib/shared-scaffold';
+import type {
+  FeatureDefinition,
+  InstalledFeatures,
+} from './lib/types';
 
 interface AddGeneratorOptions extends GeneratorBase.GeneratorOptions {
   featureName?: string;
@@ -33,7 +33,13 @@ interface FeaturePromptAnswers extends GeneratorBase.Answers {
   featureName: string;
 }
 
-const FEATURES = [bffFeature, uiLibraryFeature, authFeature, reduxFeature];
+const FEATURES = [
+  bffFeature,
+  uiLibraryFeature,
+  authFeature,
+  reduxFeature,
+  reactQueryFeature,
+];
 const FEATURE_BY_NAME = new Map(
   FEATURES.map((featureDefinition) => [
     featureDefinition.name,
@@ -72,7 +78,7 @@ export = class AddGenerator extends GeneratorBase {
     appDisplayName: string;
   };
 
-  projectState!: FeatureState;
+  installedFeatures!: InstalledFeatures;
 
   constructor(args: string | string[], opts: AddGeneratorOptions) {
     super(args, opts);
@@ -127,7 +133,7 @@ export = class AddGenerator extends GeneratorBase {
       appName: this.appName,
       appDisplayName: this.appDisplayName,
     };
-    this.projectState = this._detectProjectState();
+    this.installedFeatures = this._detectInstalledFeatures();
 
     this.featureDefinition.validate(this);
   }
@@ -179,40 +185,13 @@ export = class AddGenerator extends GeneratorBase {
     return packageJson;
   }
 
-  _detectProjectState(): FeatureState {
-    const hasUiLibrary = uiLibraryFeature.isInstalled?.(this) ?? false;
-    const hasAuth = authFeature.isInstalled?.(this) ?? false;
-    const hasRedux = reduxFeature.isInstalled?.(this) ?? false;
-
-    if (hasUiLibrary && hasAuth && hasRedux) {
-      return FEATURE_STATES.uiLibraryAuthRedux;
-    }
-
-    if (hasUiLibrary && hasAuth) {
-      return FEATURE_STATES.uiLibraryAuth;
-    }
-
-    if (hasUiLibrary && hasRedux) {
-      return FEATURE_STATES.uiLibraryRedux;
-    }
-
-    if (hasUiLibrary) {
-      return FEATURE_STATES.uiLibrary;
-    }
-
-    if (hasAuth && hasRedux) {
-      return FEATURE_STATES.authRedux;
-    }
-
-    if (hasAuth) {
-      return FEATURE_STATES.auth;
-    }
-
-    if (hasRedux) {
-      return FEATURE_STATES.redux;
-    }
-
-    return FEATURE_STATES.base;
+  _detectInstalledFeatures(): InstalledFeatures {
+    return {
+      auth: authFeature.isInstalled?.(this) ?? false,
+      uiLibrary: uiLibraryFeature.isInstalled?.(this) ?? false,
+      redux: reduxFeature.isInstalled?.(this) ?? false,
+      reactQuery: reactQueryFeature.isInstalled?.(this) ?? false,
+    };
   }
 
   _validateManagedFiles(
@@ -256,6 +235,38 @@ export = class AddGenerator extends GeneratorBase {
     if (modifiedManagedFiles.length > 0) {
       throw new Error(
         `${featureLabel} generation aborted because these managed files do not match the expected ${stateLabel} scaffold: ${modifiedManagedFiles.join(', ')}.`,
+      );
+    }
+  }
+
+  _validateSharedScaffold(
+    featureLabel: string,
+    features: InstalledFeatures,
+  ): void {
+    const expectedFiles = buildSharedScaffold(this.templateContext, features);
+    const missingManagedFiles = Object.keys(expectedFiles).filter(
+      (filePath) => !fs.existsSync(this.destinationPath(filePath)),
+    );
+
+    if (missingManagedFiles.length > 0) {
+      throw new Error(
+        `${featureLabel} generation aborted because required scaffold files are missing: ${missingManagedFiles.join(', ')}.`,
+      );
+    }
+
+    const modifiedManagedFiles = Object.entries(expectedFiles)
+      .filter(([filePath, expectedContent]) => {
+        const currentContent = normalizeLineEndings(
+          fs.readFileSync(this.destinationPath(filePath), 'utf8'),
+        );
+
+        return currentContent !== normalizeLineEndings(expectedContent);
+      })
+      .map(([filePath]) => filePath);
+
+    if (modifiedManagedFiles.length > 0) {
+      throw new Error(
+        `${featureLabel} generation aborted because these managed files do not match the expected scaffold: ${modifiedManagedFiles.join(', ')}.`,
       );
     }
   }
@@ -307,6 +318,14 @@ export = class AddGenerator extends GeneratorBase {
           this.templateContext,
         ),
       );
+    });
+  }
+
+  _writeSharedScaffold(features: InstalledFeatures): void {
+    const scaffoldFiles = buildSharedScaffold(this.templateContext, features);
+
+    Object.entries(scaffoldFiles).forEach(([filePath, contents]) => {
+      this.fs.write(this.destinationPath(filePath), contents);
     });
   }
 

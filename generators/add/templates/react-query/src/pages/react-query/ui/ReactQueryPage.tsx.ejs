@@ -1,0 +1,49 @@
+import { Link } from 'react-router-dom';
+import { env } from '@/shared/config';
+
+const generatedFiles = [
+  'src/shared/api/createApiClient.ts',
+  'src/shared/api/createQueryClient.ts',
+  'src/shared/api/useApiQuery.ts',
+  'src/shared/api/useApiMutation.ts',
+  'src/features/react-query-demo/api/useGetChatMessages.ts',
+  'src/features/react-query-demo/api/useCallChatMutation.ts',
+];
+
+export function ReactQueryPage() {
+  return (
+    <main className="page">
+      <section className="hero">
+        <p className="eyebrow">React Query example</p>
+        <h1>Query client and API hooks are wired in</h1>
+        <p>
+          This route is a setup guide for the generated React Query feature. The
+          QueryClient provider, devtools, Axios client, and generic wrappers are
+          already added to the app shell.
+        </p>
+        <p>
+          Default API base URL: <code>{env.apiBaseUrl}</code>
+        </p>
+        <p>
+          The generated example hooks show how to compose <code>useApiQuery</code>{' '}
+          and <code>useApiMutation</code> around typed query keys, invalidation,
+          and payload transforms.
+        </p>
+        <ul>
+          {generatedFiles.map((filePath) => (
+            <li key={filePath}>
+              <code>{filePath}</code>
+            </li>
+          ))}
+        </ul>
+        <p>
+          Replace the demo chat endpoints and the example <code>decryptData</code>{' '}
+          helper with your real API contract once your backend is ready.
+        </p>
+        <p>
+          <Link to="/">Return to the home page</Link>
+        </p>
+      </section>
+    </main>
+  );
+}

@@ -62,7 +62,7 @@ test('adds the redux feature to an existing generated base app', async () => {
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
-    '<Provider store={store}>{children}</Provider>',
+    'Provider store={store}',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/app/routes/AppRouter.tsx'),
@@ -165,7 +165,7 @@ test('redux can be added after ui-library without removing theme wiring', async 
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
-    'Redux Toolkit and redux-persist',
+    'persisted Redux Toolkit store',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),

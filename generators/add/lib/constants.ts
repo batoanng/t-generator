@@ -15,15 +15,3 @@ export const REQUIRED_BASE_FILES = [
   'src/app/routes/AppRouter.tsx',
   'src/shared/config/env.ts',
 ];
-export const FEATURE_STATES = {
-  base: 'base',
-  auth: 'auth',
-  uiLibrary: 'ui-library',
-  uiLibraryAuth: 'ui-library-auth',
-  redux: 'redux',
-  authRedux: 'auth-redux',
-  uiLibraryRedux: 'ui-library-redux',
-  uiLibraryAuthRedux: 'ui-library-auth-redux',
-} as const;
-
-export type FeatureState = (typeof FEATURE_STATES)[keyof typeof FEATURE_STATES];

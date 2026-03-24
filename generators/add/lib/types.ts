@@ -3,7 +3,13 @@ import type {
   PackageJson,
   TemplateContext,
 } from '../../lib/types';
-import type { FeatureState } from './constants';
+
+export interface InstalledFeatures {
+  auth: boolean;
+  uiLibrary: boolean;
+  redux: boolean;
+  reactQuery: boolean;
+}
 
 export interface AddGeneratorContext {
   featureName: string;
@@ -14,7 +20,7 @@ export interface AddGeneratorContext {
   appName: string;
   appDisplayName: string;
   templateContext: TemplateContext;
-  projectState: FeatureState;
+  installedFeatures: InstalledFeatures;
   fs: {
     copyTpl(from: string, to: string, context: Record<string, string>): void;
     write(filePath: string, contents: string): void;
@@ -28,9 +34,14 @@ export interface AddGeneratorContext {
     managedFiles: ManagedFile[],
     stateLabel: string,
   ): void;
+  _validateSharedScaffold(
+    featureLabel: string,
+    features: InstalledFeatures,
+  ): void;
   _writeDependencies(dependencyMap: Record<string, string>): void;
   _writeDevDependencies(dependencyMap: Record<string, string>): void;
   _writeManagedFiles(templateDefinitions: ManagedFile[]): void;
+  _writeSharedScaffold(features: InstalledFeatures): void;
 }
 
 export interface FeatureDefinition {

@@ -167,6 +167,7 @@ yo t-generator:add bff
 yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
+yo t-generator:add react-query
 ```
 
 Responsibilities:
@@ -176,6 +177,14 @@ Responsibilities:
 - wire the feature into existing providers, routes, config, and scripts
 - validate that the target project already contains the generated base app before writing feature-managed files
 - avoid duplicating existing setup where possible
+
+Prompt order for the current implementation:
+
+1. `bff`
+2. `ui-library`
+3. `auth`
+4. `redux`
+5. `react-query`
 
 ### 7.3 Test command
 
@@ -392,9 +401,21 @@ Purpose:
 Responsibilities:
 
 - install `@tanstack/react-query`
-- create query client setup
-- wire the provider into the app
-- add a small example query hook or sample usage
+- install `@tanstack/react-query-devtools` and `axios`
+- create shared QueryClient and Axios client setup under `src/shared/api`
+- export generic `useApiQuery` and `useApiMutation` wrappers for feature-level hooks
+- extend generated env handling with `VITE_API_BASE_URL`
+- wire `QueryClientProvider` into the app provider tree and mount devtools in development
+- add a generated `/react-query` example page
+- add a main-page link to open the React Query example
+- generate example query and mutation hooks that follow the example app's structure
+- validate existing managed files before writing React Query changes
+
+Notes:
+
+- The generated example route should be setup guidance, not a mocked live data demo.
+- The feature should work on the base app and also compose with `auth`, `redux`, and `ui-library` in either order.
+- The generated Axios client should default to `VITE_API_BASE_URL=/api`.
 
 ### 9.5 `apollo`
 
@@ -481,6 +502,7 @@ Feature generators should compose cleanly.
 - `auth` may integrate with `apollo`
 - `ui-library` and `auth` must compose without a required order
 - `redux` must compose cleanly with both `auth` and `ui-library`
+- `react-query` must compose cleanly with `auth`, `redux`, and `ui-library`
 - `notifications` may extend the provider tree created by `ui-library`
 - `bff` may add scripts without disrupting existing frontend scripts
 
@@ -506,7 +528,7 @@ Examples:
 
 - `ui-library`: render with provider
 - `auth`: provider and `/auth` page smoke test
-- `react-query`: query client wrapper test
+- `react-query`: query client and `/react-query` page smoke test
 - `redux`: store or slice smoke test
 - `bff`: server boot or config smoke test where practical
 
@@ -560,6 +582,7 @@ The first implementation pass should prioritize:
 2. bff
 3. ui-library
 4. auth
-5. react-query
+5. redux
+6. react-query
 
 The remaining features can follow after the core generation flow is stable.

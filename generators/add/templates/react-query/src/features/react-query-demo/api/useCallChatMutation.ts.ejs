@@ -1,0 +1,43 @@
+import {
+  type UseMutationOptions,
+  type UseMutationResult,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { useParams } from 'react-router-dom';
+import { apiClient, useApiMutation } from '@/shared/api';
+import { decryptData } from '@/shared/lib';
+import { CacheKeys, type ChatMessage } from '../model';
+
+export const useCallChatMutation = (
+  options?: Omit<UseMutationOptions<ChatMessage, AxiosError, string>, 'mutationFn'>,
+): UseMutationResult<ChatMessage, AxiosError, string> => {
+  const queryClient = useQueryClient();
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const { onSuccess, ...restOptions } = options ?? {};
+
+  return useApiMutation<ChatMessage, string, AxiosError>({
+    mutationFn: async (message: string) => {
+      const { data } = await apiClient.post<string>('/chat', { message, sessionId });
+
+      return await decryptData<ChatMessage>(data);
+    },
+    options: {
+      ...restOptions,
+      onSuccess: async (data, variables, onMutateResult, context) => {
+        if (!sessionId && data?.sessionId) {
+          window.setTimeout(() => {
+            void queryClient.invalidateQueries({
+              queryKey: [CacheKeys.getChatHistory],
+            });
+            void queryClient.invalidateQueries({
+              queryKey: [CacheKeys.getUserQuota],
+            });
+          }, 3000);
+        }
+
+        await onSuccess?.(data, variables, onMutateResult, context);
+      },
+    },
+  });
+};

@@ -34,6 +34,10 @@ distSmokeTest(
       path.join(distRoot, 'generators/add/templates/auth/_env.example.ejs'),
       path.join(distRoot, 'generators/add/templates/bff/server/server.js.ejs'),
       path.join(distRoot, 'generators/add/templates/redux/src/app/store/index.ts.ejs'),
+      path.join(
+        distRoot,
+        'generators/add/templates/react-query/src/shared/api/useApiQuery.ts.ejs',
+      ),
     ]);
 
     assert.equal(distPackageJson.main, 'generators/app/index.js');
@@ -55,12 +59,12 @@ distSmokeTest(
 
     await runResult
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
-      .withArguments(['redux'])
+      .withArguments(['react-query'])
       .run();
 
     yoAssert.file([
-      path.join(projectRoot, 'src/app/store/index.ts'),
-      path.join(projectRoot, 'src/pages/redux/index.ts'),
+      path.join(projectRoot, 'src/shared/api/createQueryClient.ts'),
+      path.join(projectRoot, 'src/pages/react-query/index.ts'),
     ]);
   },
 );

@@ -4,6 +4,7 @@ import path from 'node:path';
 import GeneratorBase from 'yeoman-generator';
 
 import type { TemplateContext } from '../lib/types';
+import { buildSharedScaffold } from '../add/lib/shared-scaffold';
 
 interface AppGeneratorOptions extends GeneratorBase.GeneratorOptions {
   appName?: string;
@@ -122,27 +123,14 @@ export = class AppGenerator extends GeneratorBase {
       ['_gitignore.ejs', '.gitignore'],
       ['_prettierrc.json.ejs', '.prettierrc.json'],
       ['_prettierignore.ejs', '.prettierignore'],
-      ['_env.example.ejs', '.env.example'],
       ['src/main.tsx.ejs', 'src/main.tsx'],
-      ['src/vite-env.d.ts.ejs', 'src/vite-env.d.ts'],
       ['src/test/setup.ts.ejs', 'src/test/setup.ts'],
       ['src/app/entrypoint/App.tsx.ejs', 'src/app/entrypoint/App.tsx'],
       ['src/app/entrypoint/index.ts.ejs', 'src/app/entrypoint/index.ts'],
-      [
-        'src/app/providers/AppProviders.tsx.ejs',
-        'src/app/providers/AppProviders.tsx',
-      ],
       ['src/app/providers/index.ts.ejs', 'src/app/providers/index.ts'],
-      ['src/app/routes/AppRouter.tsx.ejs', 'src/app/routes/AppRouter.tsx'],
       ['src/app/routes/index.ts.ejs', 'src/app/routes/index.ts'],
       ['src/app/styles/global.css.ejs', 'src/app/styles/global.css'],
       ['src/pages/home/index.ts.ejs', 'src/pages/home/index.ts'],
-      ['src/pages/home/ui/HomePage.tsx.ejs', 'src/pages/home/ui/HomePage.tsx'],
-      [
-        'src/pages/home/ui/HomePage.test.tsx.ejs',
-        'src/pages/home/ui/HomePage.test.tsx',
-      ],
-      ['src/shared/config/env.ts.ejs', 'src/shared/config/env.ts'],
       ['src/shared/config/index.ts.ejs', 'src/shared/config/index.ts'],
       ['src/shared/ui/index.ts.ejs', 'src/shared/ui/index.ts'],
       ['src/shared/api/index.ts.ejs', 'src/shared/api/index.ts'],
@@ -155,6 +143,17 @@ export = class AppGenerator extends GeneratorBase {
         this.destinationPath(to),
         templateContext,
       );
+    });
+
+    const sharedScaffold = buildSharedScaffold(templateContext, {
+      auth: false,
+      uiLibrary: false,
+      redux: false,
+      reactQuery: false,
+    });
+
+    Object.entries(sharedScaffold).forEach(([filePath, contents]) => {
+      this.fs.write(this.destinationPath(filePath), contents);
     });
 
     ['src/widgets', 'src/features', 'src/entities'].forEach((directory) => {

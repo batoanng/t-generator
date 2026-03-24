@@ -191,7 +191,7 @@ test('ui-library can be added after redux without removing Redux wiring', async 
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
-    'Redux Toolkit and redux-persist',
+    'persisted Redux Toolkit store',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
@@ -307,6 +307,6 @@ test('fails clearly for unknown feature names', async () => {
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
       .withArguments(['theme'])
       .run(),
-    /Supported features: bff, ui-library, auth, redux/,
+    /Supported features: bff, ui-library, auth, redux, react-query/,
   );
 });
