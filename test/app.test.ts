@@ -1,34 +1,29 @@
-import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
-import test from "node:test";
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
 
-import yoAssert from "yeoman-assert";
+import yoAssert from 'yeoman-assert';
 
-import {
-  appGeneratorPath,
-  createYeomanTestHelpers,
-  readJson,
-} from "./helpers";
-
-import type { PackageJson } from "../generators/lib/types";
+import type { PackageJson } from '../generators/lib/types';
+import { appGeneratorPath, createYeomanTestHelpers, readJson } from './helpers';
 
 const blockedDependencies = [
-  "@batoanng/mui-components",
-  "@emotion/react",
-  "@emotion/styled",
-  "@apollo/client",
-  "@auth0/auth0-react",
-  "@mui/material",
-  "@mui/icons-material",
-  "@reduxjs/toolkit",
-  "@tanstack/react-query",
-  "vite-plugin-pwa",
-  "notistack",
+  '@batoanng/mui-components',
+  '@emotion/react',
+  '@emotion/styled',
+  '@apollo/client',
+  '@auth0/auth0-react',
+  '@mui/material',
+  '@mui/icons-material',
+  '@reduxjs/toolkit',
+  '@tanstack/react-query',
+  'vite-plugin-pwa',
+  'notistack',
 ];
 
-test("generates the base app with the expected project structure", async () => {
-  let tmpDir = "";
+test('generates the base app with the expected project structure', async () => {
+  let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
 
   await helpers
@@ -36,45 +31,47 @@ test("generates the base app with the expected project structure", async () => {
     .inTmpDir((directory) => {
       tmpDir = directory;
     })
-    .withArguments(["starter-app"]);
+    .withArguments(['starter-app']);
 
-  const projectRoot = path.join(tmpDir, "starter-app");
-  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
+  const projectRoot = path.join(tmpDir, 'starter-app');
+  const packageJson = readJson<PackageJson>(
+    path.join(projectRoot, 'package.json'),
+  );
 
   yoAssert.file([
-    path.join(projectRoot, "package.json"),
-    path.join(projectRoot, "index.html"),
-    path.join(projectRoot, "tsconfig.json"),
-    path.join(projectRoot, "vite.config.ts"),
-    path.join(projectRoot, "vitest.config.ts"),
-    path.join(projectRoot, "eslint.config.js"),
-    path.join(projectRoot, ".prettierrc.json"),
-    path.join(projectRoot, ".prettierignore"),
-    path.join(projectRoot, ".env.example"),
-    path.join(projectRoot, "src/main.tsx"),
-    path.join(projectRoot, "src/app/entrypoint/App.tsx"),
-    path.join(projectRoot, "src/app/providers/AppProviders.tsx"),
-    path.join(projectRoot, "src/app/routes/AppRouter.tsx"),
-    path.join(projectRoot, "src/app/styles/global.css"),
-    path.join(projectRoot, "src/pages/home/index.ts"),
-    path.join(projectRoot, "src/pages/home/ui/HomePage.tsx"),
-    path.join(projectRoot, "src/pages/home/ui/HomePage.test.tsx"),
-    path.join(projectRoot, "src/shared/config/env.ts"),
-    path.join(projectRoot, "src/test/setup.ts"),
+    path.join(projectRoot, 'package.json'),
+    path.join(projectRoot, 'index.html'),
+    path.join(projectRoot, 'tsconfig.json'),
+    path.join(projectRoot, 'vite.config.ts'),
+    path.join(projectRoot, 'vitest.config.ts'),
+    path.join(projectRoot, 'eslint.config.js'),
+    path.join(projectRoot, '.prettierrc.json'),
+    path.join(projectRoot, '.prettierignore'),
+    path.join(projectRoot, '.env.example'),
+    path.join(projectRoot, 'src/main.tsx'),
+    path.join(projectRoot, 'src/app/entrypoint/App.tsx'),
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    path.join(projectRoot, 'src/app/routes/AppRouter.tsx'),
+    path.join(projectRoot, 'src/app/styles/global.css'),
+    path.join(projectRoot, 'src/pages/home/index.ts'),
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.test.tsx'),
+    path.join(projectRoot, 'src/shared/config/env.ts'),
+    path.join(projectRoot, 'src/test/setup.ts'),
   ]);
 
   assert.deepEqual(Object.keys(packageJson.scripts || {}), [
-    "dev",
-    "build",
-    "preview",
-    "lint",
-    "test",
+    'dev',
+    'build',
+    'preview',
+    'lint',
+    'test',
   ]);
 
   assert.deepEqual(Object.keys(packageJson.dependencies || {}).sort(), [
-    "react",
-    "react-dom",
-    "react-router-dom",
+    'react',
+    'react-dom',
+    'react-router-dom',
   ]);
 
   blockedDependencies.forEach((dependencyName) => {
@@ -83,12 +80,12 @@ test("generates the base app with the expected project structure", async () => {
   });
 
   [
-    "src/widgets",
-    "src/features",
-    "src/entities",
-    "src/shared/ui",
-    "src/shared/api",
-    "src/shared/lib",
+    'src/widgets',
+    'src/features',
+    'src/entities',
+    'src/shared/ui',
+    'src/shared/api',
+    'src/shared/lib',
   ].forEach((directory) => {
     assert.equal(
       fs.statSync(path.join(projectRoot, directory)).isDirectory(),
@@ -97,33 +94,36 @@ test("generates the base app with the expected project structure", async () => {
     );
   });
 
-  assert.equal(fs.existsSync(path.join(projectRoot, "server")), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'server')), false);
   assert.equal(
-    fs.existsSync(path.join(projectRoot, "src/features/auth")),
+    fs.existsSync(path.join(projectRoot, 'src/features/auth')),
     false,
   );
 
   yoAssert.fileContent(
-    path.join(projectRoot, "src/shared/config/env.ts"),
-    "appName: import.meta.env.VITE_APP_NAME?.trim() || fallbackAppName",
+    path.join(projectRoot, 'src/shared/config/env.ts'),
+    'appName: import.meta.env.VITE_APP_NAME?.trim() || fallbackAppName',
   );
   yoAssert.fileContent(
-    path.join(projectRoot, "src/app/routes/AppRouter.tsx"),
+    path.join(projectRoot, 'src/app/routes/AppRouter.tsx'),
     '<Route path="/" element={<HomePage />} />',
   );
   yoAssert.fileContent(
-    path.join(projectRoot, "src/pages/home/ui/HomePage.test.tsx"),
-    "render(<HomePage />);",
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.test.tsx'),
+    'render(<HomePage />);',
   );
-  yoAssert.fileContent(path.join(projectRoot, "README.md"), "yo t-generator:add");
   yoAssert.fileContent(
-    path.join(projectRoot, "README.md"),
-    "yo t-generator:add auth",
+    path.join(projectRoot, 'README.md'),
+    'yo t-generator:add',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'README.md'),
+    'yo t-generator:add auth',
   );
 });
 
-test("prompts for the app name when one is not provided", async () => {
-  let tmpDir = "";
+test('prompts for the app name when one is not provided', async () => {
+  let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
 
   await helpers
@@ -131,22 +131,22 @@ test("prompts for the app name when one is not provided", async () => {
     .inTmpDir((directory) => {
       tmpDir = directory;
     })
-    .withPrompts({ appName: "Prompt Driven App" });
+    .withPrompts({ appName: 'Prompt Driven App' });
 
-  const projectRoot = path.join(tmpDir, "prompt-driven-app");
+  const projectRoot = path.join(tmpDir, 'prompt-driven-app');
 
   yoAssert.file([
-    path.join(projectRoot, "package.json"),
-    path.join(projectRoot, "src/pages/home/ui/HomePage.tsx"),
+    path.join(projectRoot, 'package.json'),
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
   ]);
   yoAssert.fileContent(
-    path.join(projectRoot, ".env.example"),
-    "VITE_APP_NAME=Prompt Driven App",
+    path.join(projectRoot, '.env.example'),
+    'VITE_APP_NAME=Prompt Driven App',
   );
 });
 
-test("fails when the target directory already exists and is not empty", async () => {
-  let tmpDir = "";
+test('fails when the target directory already exists and is not empty', async () => {
+  let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
 
   await assert.rejects(
@@ -155,18 +155,18 @@ test("fails when the target directory already exists and is not empty", async ()
         .run(appGeneratorPath)
         .inTmpDir((directory) => {
           tmpDir = directory;
-          const targetDirectory = path.join(directory, "existing-app");
+          const targetDirectory = path.join(directory, 'existing-app');
 
           fs.mkdirSync(targetDirectory, { recursive: true });
-          fs.writeFileSync(path.join(targetDirectory, "keep.txt"), "existing");
+          fs.writeFileSync(path.join(targetDirectory, 'keep.txt'), 'existing');
         })
-        .withArguments(["existing-app"])
+        .withArguments(['existing-app'])
         .run(),
     /already exists and is not empty/,
   );
 
   assert.equal(
-    fs.existsSync(path.join(tmpDir, "existing-app", "keep.txt")),
+    fs.existsSync(path.join(tmpDir, 'existing-app', 'keep.txt')),
     true,
   );
 });

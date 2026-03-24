@@ -1,35 +1,38 @@
-import fs from "node:fs";
+import fs from 'node:fs';
 
-import type { FeatureDefinition } from "../lib/types";
+import type { FeatureDefinition } from '../lib/types';
 
-const BFF_MANAGED_SCRIPTS = ["dev:client", "dev:server", "dev:full"];
+const BFF_MANAGED_SCRIPTS = ['dev:client', 'dev:server', 'dev:full'];
 
 const bffFeature: FeatureDefinition = {
-  name: "bff",
-  label: "BFF",
+  name: 'bff',
+  label: 'BFF',
   validate(generator) {
-    if (fs.existsSync(generator.destinationPath("server"))) {
-      throw new Error('BFF generation aborted because "server/" already exists.');
+    if (fs.existsSync(generator.destinationPath('server'))) {
+      throw new Error(
+        'BFF generation aborted because "server/" already exists.',
+      );
     }
 
     const existingManagedScripts = BFF_MANAGED_SCRIPTS.filter(
-      (scriptName) => typeof generator.rootPackageJson.scripts?.[scriptName] === "string",
+      (scriptName) =>
+        typeof generator.rootPackageJson.scripts?.[scriptName] === 'string',
     );
 
     if (existingManagedScripts.length > 0) {
       throw new Error(
-        `BFF generation aborted because package.json already defines: ${existingManagedScripts.join(", ")}.`,
+        `BFF generation aborted because package.json already defines: ${existingManagedScripts.join(', ')}.`,
       );
     }
   },
   write(generator) {
     const templateFiles = [
-      ["bff/server/package.json.ejs", "server/package.json"],
-      ["bff/server/server.js.ejs", "server/server.js"],
-      ["bff/server/README.md.ejs", "server/README.md"],
-      ["bff/server/_gitignore.ejs", "server/.gitignore"],
-      ["bff/server/_env.development.ejs", "server/.env.development"],
-      ["bff/server/_env.production.ejs", "server/.env.production"],
+      ['bff/server/package.json.ejs', 'server/package.json'],
+      ['bff/server/server.js.ejs', 'server/server.js'],
+      ['bff/server/README.md.ejs', 'server/README.md'],
+      ['bff/server/_gitignore.ejs', 'server/.gitignore'],
+      ['bff/server/_env.development.ejs', 'server/.env.development'],
+      ['bff/server/_env.production.ejs', 'server/.env.production'],
     ] as const;
 
     templateFiles.forEach(([from, to]) => {
@@ -44,15 +47,15 @@ const bffFeature: FeatureDefinition = {
       ...generator.rootPackageJson,
       scripts: {
         ...generator.rootPackageJson.scripts,
-        "dev:client": generator.rootPackageJson.scripts?.dev,
-        "dev:server": "npm --prefix server run start",
-        "dev:full":
+        'dev:client': generator.rootPackageJson.scripts?.dev,
+        'dev:server': 'npm --prefix server run start',
+        'dev:full':
           'concurrently -k -n client,server "npm run dev:client" "npm run dev:server"',
       },
       devDependencies: {
         ...generator.rootPackageJson.devDependencies,
         concurrently:
-          generator.rootPackageJson.devDependencies?.concurrently || "^9.0.1",
+          generator.rootPackageJson.devDependencies?.concurrently || '^9.0.1',
       },
     };
 
@@ -63,10 +66,10 @@ const bffFeature: FeatureDefinition = {
   },
   end(generator) {
     generator.log('BFF feature scaffolded in "./server".');
-    generator.log("Next steps:");
-    generator.log("  npm install");
-    generator.log("  npm --prefix server install");
-    generator.log("  npm run dev:full");
+    generator.log('Next steps:');
+    generator.log('  npm install');
+    generator.log('  npm --prefix server install');
+    generator.log('  npm run dev:full');
   },
 };
 

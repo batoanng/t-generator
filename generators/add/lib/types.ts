@@ -1,5 +1,9 @@
-import type { ManagedFile, PackageJson, TemplateContext } from "../../lib/types";
-import type { FeatureState } from "./constants";
+import type {
+  ManagedFile,
+  PackageJson,
+  TemplateContext,
+} from '../../lib/types';
+import type { FeatureState } from './constants';
 
 export interface AddGeneratorContext {
   featureName: string;
@@ -12,11 +16,7 @@ export interface AddGeneratorContext {
   templateContext: TemplateContext;
   projectState: FeatureState;
   fs: {
-    copyTpl(
-      from: string,
-      to: string,
-      context: Record<string, string>,
-    ): void;
+    copyTpl(from: string, to: string, context: Record<string, string>): void;
     write(filePath: string, contents: string): void;
   };
   destinationRoot(rootPath?: string): string;

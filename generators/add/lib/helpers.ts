@@ -1,9 +1,12 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { ADD_TEMPLATE_ROOT, APP_TEMPLATE_ROOT } from "./constants";
-
-import type { ManagedFile, PackageJson, TemplateContext } from "../../lib/types";
+import type {
+  ManagedFile,
+  PackageJson,
+  TemplateContext,
+} from '../../lib/types';
+import { ADD_TEMPLATE_ROOT, APP_TEMPLATE_ROOT } from './constants';
 
 export function appManagedFile(
   filePath: string,
@@ -12,7 +15,7 @@ export function appManagedFile(
   return {
     path: filePath,
     templatePath,
-    templateSource: "app",
+    templateSource: 'app',
   };
 }
 
@@ -23,28 +26,28 @@ export function addManagedFile(
   return {
     path: filePath,
     templatePath,
-    templateSource: "add",
+    templateSource: 'add',
   };
 }
 
 export function readJson<T = unknown>(filePath: string): T {
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
 }
 
 export function normalizeFeatureName(input: unknown): string {
-  return (typeof input === "string" ? input : "").trim().toLowerCase();
+  return (typeof input === 'string' ? input : '').trim().toLowerCase();
 }
 
 export function toDisplayName(appName: unknown): string {
-  return (typeof appName === "string" ? appName : "")
+  return (typeof appName === 'string' ? appName : '')
     .split(/[^a-zA-Z0-9]+/)
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(" ");
+    .join(' ');
 }
 
 export function normalizeLineEndings(value: string | undefined): string {
-  return String(value || "").replace(/\r\n/g, "\n");
+  return String(value || '').replace(/\r\n/g, '\n');
 }
 
 export function readAppDisplayName(filePath: string, fallback: string): string {
@@ -52,7 +55,7 @@ export function readAppDisplayName(filePath: string, fallback: string): string {
     return fallback;
   }
 
-  const match = normalizeLineEndings(fs.readFileSync(filePath, "utf8")).match(
+  const match = normalizeLineEndings(fs.readFileSync(filePath, 'utf8')).match(
     /^VITE_APP_NAME=(.+)$/m,
   );
   const value = match?.[1]?.trim();
@@ -73,7 +76,7 @@ export function renderTemplateFile(
   filePath: string,
   context: TemplateContext,
 ): string {
-  return renderTemplateContent(fs.readFileSync(filePath, "utf8"), context);
+  return renderTemplateContent(fs.readFileSync(filePath, 'utf8'), context);
 }
 
 export function hasPackageDependency(
@@ -81,8 +84,8 @@ export function hasPackageDependency(
   dependencyName: string,
 ): boolean {
   return (
-    typeof packageJson.dependencies?.[dependencyName] === "string" ||
-    typeof packageJson.devDependencies?.[dependencyName] === "string"
+    typeof packageJson.dependencies?.[dependencyName] === 'string' ||
+    typeof packageJson.devDependencies?.[dependencyName] === 'string'
   );
 }
 
@@ -90,7 +93,7 @@ export function resolveTemplateAbsolutePath(
   templateDefinition: ManagedFile,
 ): string {
   const templateRoot =
-    templateDefinition.templateSource === "app"
+    templateDefinition.templateSource === 'app'
       ? APP_TEMPLATE_ROOT
       : ADD_TEMPLATE_ROOT;
 

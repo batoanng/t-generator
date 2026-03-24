@@ -1,4 +1,4 @@
-declare module "yeoman-assert" {
+declare module 'yeoman-assert' {
   interface YeomanAssert {
     file(paths: string[]): void;
     fileContent(filePath: string, contents: string | RegExp): void;

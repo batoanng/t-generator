@@ -19,7 +19,7 @@ export interface TemplateContext {
   appDisplayName: string;
 }
 
-export type TemplateSource = "app" | "add";
+export type TemplateSource = 'app' | 'add';
 
 export interface ManagedFile {
   path: string;

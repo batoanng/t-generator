@@ -1,9 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
-import GeneratorBase from "yeoman-generator";
+import GeneratorBase from 'yeoman-generator';
 
-import type { TemplateContext } from "../lib/types";
+import type { TemplateContext } from '../lib/types';
 
 interface AppGeneratorOptions extends GeneratorBase.GeneratorOptions {
   appName?: string;
@@ -14,32 +14,32 @@ interface AppPromptAnswers extends GeneratorBase.Answers {
 }
 
 function normalizeAppName(input: unknown): string {
-  const normalizedInput = typeof input === "string" ? input : "";
+  const normalizedInput = typeof input === 'string' ? input : '';
 
   return normalizedInput
     .trim()
     .toLowerCase()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function toDisplayName(input: unknown, fallback: string): string {
-  const trimmed = (typeof input === "string" ? input : "").trim();
+  const trimmed = (typeof input === 'string' ? input : '').trim();
 
   if (trimmed) {
     return trimmed;
   }
 
   return fallback
-    .split("-")
+    .split('-')
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+    .join(' ');
 }
 
 export = class AppGenerator extends GeneratorBase {
-  declare options: GeneratorBase["options"] & AppGeneratorOptions;
+  declare options: GeneratorBase['options'] & AppGeneratorOptions;
 
   private rawAppName?: string;
 
@@ -50,10 +50,10 @@ export = class AppGenerator extends GeneratorBase {
   constructor(args: string | string[], opts: AppGeneratorOptions) {
     super(args, opts);
 
-    this.argument("appName", {
+    this.argument('appName', {
       type: String,
       required: false,
-      description: "Name of the application directory to generate.",
+      description: 'Name of the application directory to generate.',
     });
 
     this.rawAppName = this.options.appName;
@@ -66,13 +66,13 @@ export = class AppGenerator extends GeneratorBase {
 
     const answers = await this.prompt<AppPromptAnswers>([
       {
-        type: "input",
-        name: "appName",
-        message: "Application name",
-        default: "my-app",
+        type: 'input',
+        name: 'appName',
+        message: 'Application name',
+        default: 'my-app',
         validate: (value) => {
           if (!normalizeAppName(value)) {
-            return "Enter a valid application name.";
+            return 'Enter a valid application name.';
           }
 
           return true;
@@ -89,7 +89,7 @@ export = class AppGenerator extends GeneratorBase {
     const normalizedAppName = normalizeAppName(providedName);
 
     if (!normalizedAppName) {
-      throw new Error("A valid application name is required.");
+      throw new Error('A valid application name is required.');
     }
 
     const projectRoot = path.resolve(this.destinationRoot(), normalizedAppName);
@@ -112,41 +112,41 @@ export = class AppGenerator extends GeneratorBase {
     };
 
     const templateFiles = [
-      ["package.json.ejs", "package.json"],
-      ["README.md.ejs", "README.md"],
-      ["index.html.ejs", "index.html"],
-      ["tsconfig.json.ejs", "tsconfig.json"],
-      ["vite.config.ts.ejs", "vite.config.ts"],
-      ["vitest.config.ts.ejs", "vitest.config.ts"],
-      ["eslint.config.js.ejs", "eslint.config.js"],
-      ["_gitignore.ejs", ".gitignore"],
-      ["_prettierrc.json.ejs", ".prettierrc.json"],
-      ["_prettierignore.ejs", ".prettierignore"],
-      ["_env.example.ejs", ".env.example"],
-      ["src/main.tsx.ejs", "src/main.tsx"],
-      ["src/vite-env.d.ts.ejs", "src/vite-env.d.ts"],
-      ["src/test/setup.ts.ejs", "src/test/setup.ts"],
-      ["src/app/entrypoint/App.tsx.ejs", "src/app/entrypoint/App.tsx"],
-      ["src/app/entrypoint/index.ts.ejs", "src/app/entrypoint/index.ts"],
+      ['package.json.ejs', 'package.json'],
+      ['README.md.ejs', 'README.md'],
+      ['index.html.ejs', 'index.html'],
+      ['tsconfig.json.ejs', 'tsconfig.json'],
+      ['vite.config.ts.ejs', 'vite.config.ts'],
+      ['vitest.config.ts.ejs', 'vitest.config.ts'],
+      ['eslint.config.js.ejs', 'eslint.config.js'],
+      ['_gitignore.ejs', '.gitignore'],
+      ['_prettierrc.json.ejs', '.prettierrc.json'],
+      ['_prettierignore.ejs', '.prettierignore'],
+      ['_env.example.ejs', '.env.example'],
+      ['src/main.tsx.ejs', 'src/main.tsx'],
+      ['src/vite-env.d.ts.ejs', 'src/vite-env.d.ts'],
+      ['src/test/setup.ts.ejs', 'src/test/setup.ts'],
+      ['src/app/entrypoint/App.tsx.ejs', 'src/app/entrypoint/App.tsx'],
+      ['src/app/entrypoint/index.ts.ejs', 'src/app/entrypoint/index.ts'],
       [
-        "src/app/providers/AppProviders.tsx.ejs",
-        "src/app/providers/AppProviders.tsx",
+        'src/app/providers/AppProviders.tsx.ejs',
+        'src/app/providers/AppProviders.tsx',
       ],
-      ["src/app/providers/index.ts.ejs", "src/app/providers/index.ts"],
-      ["src/app/routes/AppRouter.tsx.ejs", "src/app/routes/AppRouter.tsx"],
-      ["src/app/routes/index.ts.ejs", "src/app/routes/index.ts"],
-      ["src/app/styles/global.css.ejs", "src/app/styles/global.css"],
-      ["src/pages/home/index.ts.ejs", "src/pages/home/index.ts"],
-      ["src/pages/home/ui/HomePage.tsx.ejs", "src/pages/home/ui/HomePage.tsx"],
+      ['src/app/providers/index.ts.ejs', 'src/app/providers/index.ts'],
+      ['src/app/routes/AppRouter.tsx.ejs', 'src/app/routes/AppRouter.tsx'],
+      ['src/app/routes/index.ts.ejs', 'src/app/routes/index.ts'],
+      ['src/app/styles/global.css.ejs', 'src/app/styles/global.css'],
+      ['src/pages/home/index.ts.ejs', 'src/pages/home/index.ts'],
+      ['src/pages/home/ui/HomePage.tsx.ejs', 'src/pages/home/ui/HomePage.tsx'],
       [
-        "src/pages/home/ui/HomePage.test.tsx.ejs",
-        "src/pages/home/ui/HomePage.test.tsx",
+        'src/pages/home/ui/HomePage.test.tsx.ejs',
+        'src/pages/home/ui/HomePage.test.tsx',
       ],
-      ["src/shared/config/env.ts.ejs", "src/shared/config/env.ts"],
-      ["src/shared/config/index.ts.ejs", "src/shared/config/index.ts"],
-      ["src/shared/ui/index.ts.ejs", "src/shared/ui/index.ts"],
-      ["src/shared/api/index.ts.ejs", "src/shared/api/index.ts"],
-      ["src/shared/lib/index.ts.ejs", "src/shared/lib/index.ts"],
+      ['src/shared/config/env.ts.ejs', 'src/shared/config/env.ts'],
+      ['src/shared/config/index.ts.ejs', 'src/shared/config/index.ts'],
+      ['src/shared/ui/index.ts.ejs', 'src/shared/ui/index.ts'],
+      ['src/shared/api/index.ts.ejs', 'src/shared/api/index.ts'],
+      ['src/shared/lib/index.ts.ejs', 'src/shared/lib/index.ts'],
     ] as const;
 
     templateFiles.forEach(([from, to]) => {
@@ -157,17 +157,17 @@ export = class AppGenerator extends GeneratorBase {
       );
     });
 
-    ["src/widgets", "src/features", "src/entities"].forEach((directory) => {
+    ['src/widgets', 'src/features', 'src/entities'].forEach((directory) => {
       fs.mkdirSync(this.destinationPath(directory), { recursive: true });
     });
   }
 
   end(): void {
-    this.log("");
+    this.log('');
     this.log(`Base app scaffolded in ./${this.appName}`);
-    this.log("Next steps:");
+    this.log('Next steps:');
     this.log(`  cd ${this.appName}`);
-    this.log("  npm install");
-    this.log("  npm run dev");
+    this.log('  npm install');
+    this.log('  npm run dev');
   }
 };

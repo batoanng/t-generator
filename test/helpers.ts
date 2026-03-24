@@ -1,41 +1,41 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
-import type { PackageJson } from "../generators/lib/types";
+import type { PackageJson } from '../generators/lib/types';
 
-const useDistBuild = process.env.TEST_TARGET === "dist";
+const useDistBuild = process.env.TEST_TARGET === 'dist';
 const generatorExtension = useDistBuild
-  ? ".js"
-  : path.extname(__filename) === ".ts"
-    ? ".ts"
-    : ".js";
+  ? '.js'
+  : path.extname(__filename) === '.ts'
+    ? '.ts'
+    : '.js';
 const generatorRoot = useDistBuild
-  ? path.join(__dirname, "../dist/generators")
-  : path.join(__dirname, "../generators");
+  ? path.join(__dirname, '../dist/generators')
+  : path.join(__dirname, '../generators');
 
 export const appGeneratorPath = path.join(
   generatorRoot,
-  "app",
+  'app',
   `index${generatorExtension}`,
 );
 export const addGeneratorPath = path.join(
   generatorRoot,
-  "add",
+  'add',
   `index${generatorExtension}`,
 );
 
 export function readJson<T = PackageJson>(filePath: string): T {
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
 }
 
 export async function createYeomanTestHelpers() {
-  const { createHelpers } = await import("yeoman-test");
+  const { createHelpers } = await import('yeoman-test');
 
   return createHelpers({});
 }
 
 export async function scaffoldBaseApp(appName: string) {
-  let tmpDir = "";
+  let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
 
   const runResult = await helpers
