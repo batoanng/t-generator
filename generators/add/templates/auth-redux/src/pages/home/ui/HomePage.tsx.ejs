@@ -1,0 +1,31 @@
+import { Link } from 'react-router-dom';
+import { env } from '@/shared/config';
+
+export function HomePage() {
+  return (
+    <main className="page">
+      <section className="hero">
+        <p className="eyebrow">Base application</p>
+        <h1>{env.appName}</h1>
+        <p>
+          React + TypeScript + Vite starter with routing, testing, aliases, and a
+          Feature-Sliced Design foundation.
+        </p>
+        <p>
+          Auth0 scaffolding is ready for this project, including provider wiring and
+          a dedicated authentication example route.
+        </p>
+        <p>
+          Redux scaffolding is also ready, with a persisted store, typed hooks, and a
+          dedicated example page.
+        </p>
+        <p>
+          <Link to="/auth">Open the authentication example</Link>
+        </p>
+        <p>
+          <Link to="/redux">Open the Redux example</Link>
+        </p>
+      </section>
+    </main>
+  );
+}

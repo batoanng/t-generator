@@ -33,6 +33,7 @@ distSmokeTest(
       path.join(distRoot, 'generators/add/index.js'),
       path.join(distRoot, 'generators/add/templates/auth/_env.example.ejs'),
       path.join(distRoot, 'generators/add/templates/bff/server/server.js.ejs'),
+      path.join(distRoot, 'generators/add/templates/redux/src/app/store/index.ts.ejs'),
     ]);
 
     assert.equal(distPackageJson.main, 'generators/app/index.js');
@@ -54,15 +55,12 @@ distSmokeTest(
 
     await runResult
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
-      .withArguments(['auth'])
+      .withArguments(['redux'])
       .run();
 
     yoAssert.file([
-      path.join(projectRoot, 'src/pages/auth/index.ts'),
-      path.join(
-        projectRoot,
-        'src/app/providers/auth/Auth0ProviderWithNavigate.tsx',
-      ),
+      path.join(projectRoot, 'src/app/store/index.ts'),
+      path.join(projectRoot, 'src/pages/redux/index.ts'),
     ]);
   },
 );

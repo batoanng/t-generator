@@ -2,7 +2,7 @@
 
 `t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
 
-The current implementation covers the base React + TypeScript + Vite scaffold plus three add-on features: `bff`, `ui-library`, and `auth`. The base stays intentionally feature-neutral so projects can opt into backend, UI, and authentication wiring only when they need it.
+The current implementation covers the base React + TypeScript + Vite scaffold plus four add-on features: `bff`, `ui-library`, `auth`, and `redux`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, and client-state wiring only when they need it.
 
 The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
 
@@ -17,6 +17,7 @@ yo t-generator:add
 yo t-generator:add bff
 yo t-generator:add ui-library
 yo t-generator:add auth
+yo t-generator:add redux
 ```
 
 ## What the generator creates today
@@ -39,8 +40,9 @@ The base command does not install add-on features automatically. The implemented
 - `bff`, which creates a top-level `server/` package for API proxying and production frontend serving
 - `ui-library`, which owns the generated MUI theme wiring, integrates `@batoanng/mui-components`, and adds a showcase section to the home page
 - `auth`, which wires the Auth0 React SDK into the app shell, adds an `/auth` example page, and links to it from the home page
+- `redux`, which wires a persisted Redux Toolkit store into the app shell, adds a `/redux` example page, and links to it from the home page
 
-The remaining planned features are still pending: React Query, Apollo, Redux, notifications, and PWA support.
+The remaining planned features are still pending: React Query, Apollo, notifications, and PWA support.
 
 ## UI direction
 
@@ -65,6 +67,20 @@ When you add it, the generator:
 - adds a main-page link to open the auth example
 
 `auth` works as a standalone feature and also composes with `ui-library` in either order.
+
+## Redux flow
+
+The `redux` feature uses Redux Toolkit, React Redux, and `redux-persist`.
+
+When you add it, the generator:
+
+- extends `.env.example` with `VITE_ENABLE_REDUX_LOGGING`
+- adds a persisted store under `src/app/store`
+- exports typed `useAppDispatch` and `useAppSelector` hooks
+- creates a public `/redux` page that demonstrates dispatching and persisted state
+- adds a main-page link to open the Redux example
+
+`redux` works as a standalone feature and also composes with `auth` and `ui-library` in either order.
 
 ## Base app architecture
 
@@ -170,11 +186,14 @@ cd my-app
 yo t-generator:add
 ```
 
-The interactive prompt currently lets you choose between:
+Every add-on command validates that the current directory still contains the generated base app before writing managed files.
+
+The interactive prompt currently lets you choose between, in order:
 
 - `bff`
 - `ui-library`
 - `auth`
+- `redux`
 
 If you prefer the explicit form, these still work:
 
@@ -182,6 +201,7 @@ If you prefer the explicit form, these still work:
 yo t-generator:add bff
 yo t-generator:add ui-library
 yo t-generator:add auth
+yo t-generator:add redux
 ```
 
 After the BFF files are generated:
@@ -208,7 +228,16 @@ npm run dev
 
 Then add your Auth0 values in `.env.local` and open `/auth`.
 
-All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library` fails clearly if the shared UI package is already installed, if the showcase directory already exists, or if the managed base or auth-aware files no longer match the expected scaffold. `auth` fails clearly if Auth0 wiring is already present or if the managed base or UI-aware files no longer match the expected scaffold.
+After the Redux files are generated:
+
+```bash
+npm install
+npm run dev
+```
+
+Then open `/redux`.
+
+All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library` fails clearly if the shared UI package is already installed, if the showcase directory already exists, or if the managed base, auth-aware, or Redux-aware files no longer match the expected scaffold. `auth` fails clearly if Auth0 wiring is already present or if the managed base, UI-aware, or Redux-aware files no longer match the expected scaffold. `redux` fails clearly if Redux wiring is already present or if the managed base, auth-aware, or UI-aware files no longer match the expected scaffold.
 
 ## Local development
 

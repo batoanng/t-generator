@@ -1,0 +1,21 @@
+import type { PropsWithChildren } from 'react';
+import { Provider } from 'react-redux';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { createDefaultTheme } from '@batoanng/mui-components';
+import { store } from '@/app/store';
+import { Auth0ProviderWithNavigate } from './auth/Auth0ProviderWithNavigate';
+
+const appTheme = createDefaultTheme({});
+
+export function AppProviders({ children }: PropsWithChildren) {
+  return (
+    <Auth0ProviderWithNavigate>
+      <Provider store={store}>
+        <ThemeProvider theme={appTheme}>
+          <CssBaseline />
+          {children}
+        </ThemeProvider>
+      </Provider>
+    </Auth0ProviderWithNavigate>
+  );
+}

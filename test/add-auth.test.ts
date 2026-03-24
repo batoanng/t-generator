@@ -129,6 +129,79 @@ test('auth can be added after ui-library without removing theme wiring', async (
   );
 });
 
+test('auth can be added after redux without removing Redux wiring', async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp('redux-first-auth');
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['redux'])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['auth'])
+    .run();
+
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Auth0ProviderWithNavigate',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Provider store={store}',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/routes/AppRouter.tsx'),
+    'path="/redux"',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'Open the Redux example',
+  );
+});
+
+test('auth can be added after ui-library and redux without removing theme or Redux wiring', async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp(
+    'ui-redux-first-auth',
+  );
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['ui-library'])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['redux'])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['auth'])
+    .run();
+
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Auth0ProviderWithNavigate',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Provider store={store}',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    '<CssBaseline />',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'to="/auth"',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'to="/redux"',
+  );
+});
+
 test('fails when auth is generated outside the t-generator base app', async () => {
   let tmpDir = '';
   const helpers = await createYeomanTestHelpers();

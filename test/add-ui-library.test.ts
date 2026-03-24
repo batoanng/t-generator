@@ -168,6 +168,79 @@ test('ui-library can be added after auth without removing auth wiring', async ()
   );
 });
 
+test('ui-library can be added after redux without removing Redux wiring', async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp('redux-first-ui');
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['redux'])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['ui-library'])
+    .run();
+
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'createDefaultTheme({})',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Provider store={store}',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'Redux Toolkit and redux-persist',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'to="/redux"',
+  );
+});
+
+test('ui-library can be added after auth and redux without removing auth or Redux wiring', async () => {
+  const { projectRoot, runResult } = await scaffoldBaseApp(
+    'auth-redux-first-ui',
+  );
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['redux'])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['auth'])
+    .run();
+
+  await runResult
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+    .withArguments(['ui-library'])
+    .run();
+
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Auth0ProviderWithNavigate',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'Provider store={store}',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/app/providers/AppProviders.tsx'),
+    'createDefaultTheme({})',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'to="/auth"',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/pages/home/ui/HomePage.tsx'),
+    'to="/redux"',
+  );
+});
+
 test('fails when ui-library is generated outside the t-generator base app', async () => {
   let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
@@ -234,6 +307,6 @@ test('fails clearly for unknown feature names', async () => {
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
       .withArguments(['theme'])
       .run(),
-    /Supported features: bff, ui-library, auth/,
+    /Supported features: bff, ui-library, auth, redux/,
   );
 });

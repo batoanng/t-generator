@@ -1,0 +1,12 @@
+import type { PropsWithChildren } from 'react';
+import { Provider } from 'react-redux';
+import { store } from '@/app/store';
+import { Auth0ProviderWithNavigate } from './auth/Auth0ProviderWithNavigate';
+
+export function AppProviders({ children }: PropsWithChildren) {
+  return (
+    <Auth0ProviderWithNavigate>
+      <Provider store={store}>{children}</Provider>
+    </Auth0ProviderWithNavigate>
+  );
+}

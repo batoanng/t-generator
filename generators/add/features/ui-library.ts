@@ -28,6 +28,24 @@ const UI_LIBRARY_MANAGED_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
       'src/pages/home/ui/HomePage.test.tsx.ejs',
     ),
   ],
+  [FEATURE_STATES.redux]: [
+    addManagedFile(
+      'src/app/providers/AppProviders.tsx',
+      'redux/src/app/providers/AppProviders.tsx.ejs',
+    ),
+    appManagedFile(
+      'src/app/styles/global.css',
+      'src/app/styles/global.css.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.tsx',
+      'redux/src/pages/home/ui/HomePage.tsx.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.test.tsx',
+      'redux/src/pages/home/ui/HomePage.test.tsx.ejs',
+    ),
+  ],
   [FEATURE_STATES.auth]: [
     addManagedFile(
       'src/app/providers/AppProviders.tsx',
@@ -44,6 +62,24 @@ const UI_LIBRARY_MANAGED_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
     addManagedFile(
       'src/pages/home/ui/HomePage.test.tsx',
       'auth/src/pages/home/ui/HomePage.test.tsx.ejs',
+    ),
+  ],
+  [FEATURE_STATES.authRedux]: [
+    addManagedFile(
+      'src/app/providers/AppProviders.tsx',
+      'auth-redux/src/app/providers/AppProviders.tsx.ejs',
+    ),
+    appManagedFile(
+      'src/app/styles/global.css',
+      'src/app/styles/global.css.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.tsx',
+      'auth-redux/src/pages/home/ui/HomePage.tsx.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.test.tsx',
+      'auth-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
     ),
   ],
 };
@@ -67,6 +103,24 @@ const UI_LIBRARY_OUTPUT_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
       'ui-library/src/pages/home/ui/HomePage.test.tsx.ejs',
     ),
   ],
+  [FEATURE_STATES.redux]: [
+    addManagedFile(
+      'src/app/providers/AppProviders.tsx',
+      'ui-library-redux/src/app/providers/AppProviders.tsx.ejs',
+    ),
+    addManagedFile(
+      'src/app/styles/global.css',
+      'ui-library/src/app/styles/global.css.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.tsx',
+      'ui-library-redux/src/pages/home/ui/HomePage.tsx.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.test.tsx',
+      'ui-library-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
+    ),
+  ],
   [FEATURE_STATES.auth]: [
     addManagedFile(
       'src/app/providers/AppProviders.tsx',
@@ -83,6 +137,24 @@ const UI_LIBRARY_OUTPUT_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
     addManagedFile(
       'src/pages/home/ui/HomePage.test.tsx',
       'ui-library-auth/src/pages/home/ui/HomePage.test.tsx.ejs',
+    ),
+  ],
+  [FEATURE_STATES.authRedux]: [
+    addManagedFile(
+      'src/app/providers/AppProviders.tsx',
+      'ui-library-auth-redux/src/app/providers/AppProviders.tsx.ejs',
+    ),
+    addManagedFile(
+      'src/app/styles/global.css',
+      'ui-library/src/app/styles/global.css.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.tsx',
+      'ui-library-auth-redux/src/pages/home/ui/HomePage.tsx.ejs',
+    ),
+    addManagedFile(
+      'src/pages/home/ui/HomePage.test.tsx',
+      'ui-library-auth-redux/src/pages/home/ui/HomePage.test.tsx.ejs',
     ),
   ],
 };

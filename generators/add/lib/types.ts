@@ -29,6 +29,7 @@ export interface AddGeneratorContext {
     stateLabel: string,
   ): void;
   _writeDependencies(dependencyMap: Record<string, string>): void;
+  _writeDevDependencies(dependencyMap: Record<string, string>): void;
   _writeManagedFiles(templateDefinitions: ManagedFile[]): void;
 }
 

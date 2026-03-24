@@ -1,0 +1,33 @@
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
+import { AppProviders } from '@/app/providers';
+import { HomePage } from './HomePage';
+
+describe('HomePage', () => {
+  it('renders the generated UI library, auth, and Redux entry points', () => {
+    render(
+      <MemoryRouter>
+        <AppProviders>
+          <HomePage />
+        </AppProviders>
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: '<%= appDisplayName %>' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Material UI, Auth0, and a persisted Redux Toolkit store/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Shared UI, ready to extend/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Open authentication example/i }),
+    ).toHaveAttribute('href', '/auth');
+    expect(
+      screen.getByRole('link', { name: /Open the Redux example/i }),
+    ).toHaveAttribute('href', '/redux');
+  });
+});

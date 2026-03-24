@@ -1,0 +1,44 @@
+import { Button, Chip, Container, Stack, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { env } from '@/shared/config';
+import { UiLibraryShowcase } from '@/widgets/ui-library-showcase';
+
+export function HomePage() {
+  return (
+    <main className="page">
+      <Container maxWidth="lg" className="page__content">
+        <Stack spacing={{ xs: 4, md: 6 }}>
+          <Stack component="section" spacing={2}>
+            <Chip
+              label="Base application"
+              color="primary"
+              variant="outlined"
+              sx={{ alignSelf: 'flex-start' }}
+            />
+            <Typography component="h1" variant="h1">
+              {env.appName}
+            </Typography>
+            <Typography variant="h5" color="text.secondary" maxWidth={720}>
+              React + TypeScript + Vite starter with routing, testing, aliases, and a
+              Feature-Sliced Design foundation.
+            </Typography>
+            <Typography color="text.secondary" maxWidth={720}>
+              The generated shell now combines Material UI, Auth0, and a persisted
+              Redux Toolkit store so the example app structure is ready for feature
+              work immediately.
+            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <Button component={RouterLink} to="/auth" variant="contained">
+                Open authentication example
+              </Button>
+              <Button component={RouterLink} to="/redux" variant="outlined">
+                Open the Redux example
+              </Button>
+            </Stack>
+          </Stack>
+          <UiLibraryShowcase />
+        </Stack>
+      </Container>
+    </main>
+  );
+}

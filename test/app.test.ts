@@ -14,10 +14,17 @@ const blockedDependencies = [
   '@emotion/styled',
   '@apollo/client',
   '@auth0/auth0-react',
+  '@types/redux-immutable-state-invariant',
+  '@types/redux-logger',
   '@mui/material',
   '@mui/icons-material',
   '@reduxjs/toolkit',
   '@tanstack/react-query',
+  'react-redux',
+  'redux',
+  'redux-immutable-state-invariant',
+  'redux-logger',
+  'redux-persist',
   'vite-plugin-pwa',
   'notistack',
 ];
@@ -95,10 +102,12 @@ test('generates the base app with the expected project structure', async () => {
   });
 
   assert.equal(fs.existsSync(path.join(projectRoot, 'server')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/app/store')), false);
   assert.equal(
     fs.existsSync(path.join(projectRoot, 'src/features/auth')),
     false,
   );
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/pages/redux')), false);
 
   yoAssert.fileContent(
     path.join(projectRoot, 'src/shared/config/env.ts'),
@@ -119,6 +128,10 @@ test('generates the base app with the expected project structure', async () => {
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
     'yo t-generator:add auth',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'README.md'),
+    'yo t-generator:add redux',
   );
 });
 

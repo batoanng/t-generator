@@ -163,9 +163,10 @@ This command adds one feature into an existing generated project.
 Example:
 
 ```bash
-yo t-generator:add auth
-yo t-generator:add ui-library
 yo t-generator:add bff
+yo t-generator:add ui-library
+yo t-generator:add auth
+yo t-generator:add redux
 ```
 
 Responsibilities:
@@ -173,6 +174,7 @@ Responsibilities:
 - install required dependencies
 - create or update required files
 - wire the feature into existing providers, routes, config, and scripts
+- validate that the target project already contains the generated base app before writing feature-managed files
 - avoid duplicating existing setup where possible
 
 ### 7.3 Test command
@@ -419,10 +421,19 @@ Purpose:
 
 Responsibilities:
 
-- install Redux Toolkit and React Redux
-- create store setup
+- install Redux Toolkit, React Redux, persistence, and supporting Redux middleware packages
+- create app-level store setup that follows the example project's store structure while staying inside the generated app's `app` layer
 - create an example slice
+- export typed store hooks
 - wire the store provider into the app
+- add a generated `/redux` example page
+- add a main-page link to open the Redux example
+- validate existing managed files before writing Redux changes
+
+Notes:
+
+- The generated store should persist example state by default.
+- The feature should work on the base app and also compose with `auth` and `ui-library` in either order.
 
 ### 9.7 `notifications`
 
@@ -469,6 +480,7 @@ Feature generators should compose cleanly.
 
 - `auth` may integrate with `apollo`
 - `ui-library` and `auth` must compose without a required order
+- `redux` must compose cleanly with both `auth` and `ui-library`
 - `notifications` may extend the provider tree created by `ui-library`
 - `bff` may add scripts without disrupting existing frontend scripts
 

@@ -20,6 +20,10 @@ export const FEATURE_STATES = {
   auth: 'auth',
   uiLibrary: 'ui-library',
   uiLibraryAuth: 'ui-library-auth',
+  redux: 'redux',
+  authRedux: 'auth-redux',
+  uiLibraryRedux: 'ui-library-redux',
+  uiLibraryAuthRedux: 'ui-library-auth-redux',
 } as const;
 
 export type FeatureState = (typeof FEATURE_STATES)[keyof typeof FEATURE_STATES];

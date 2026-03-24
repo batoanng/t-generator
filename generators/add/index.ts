@@ -6,6 +6,7 @@ import GeneratorBase from 'yeoman-generator';
 import type { PackageJson } from '../lib/types';
 import authFeature from './features/auth';
 import bffFeature from './features/bff';
+import reduxFeature from './features/redux';
 import uiLibraryFeature from './features/ui-library';
 import {
   FEATURE_STATES,
@@ -32,7 +33,7 @@ interface FeaturePromptAnswers extends GeneratorBase.Answers {
   featureName: string;
 }
 
-const FEATURES = [bffFeature, uiLibraryFeature, authFeature];
+const FEATURES = [bffFeature, uiLibraryFeature, authFeature, reduxFeature];
 const FEATURE_BY_NAME = new Map(
   FEATURES.map((featureDefinition) => [
     featureDefinition.name,
@@ -181,17 +182,34 @@ export = class AddGenerator extends GeneratorBase {
   _detectProjectState(): FeatureState {
     const hasUiLibrary = uiLibraryFeature.isInstalled?.(this) ?? false;
     const hasAuth = authFeature.isInstalled?.(this) ?? false;
+    const hasRedux = reduxFeature.isInstalled?.(this) ?? false;
+
+    if (hasUiLibrary && hasAuth && hasRedux) {
+      return FEATURE_STATES.uiLibraryAuthRedux;
+    }
 
     if (hasUiLibrary && hasAuth) {
       return FEATURE_STATES.uiLibraryAuth;
+    }
+
+    if (hasUiLibrary && hasRedux) {
+      return FEATURE_STATES.uiLibraryRedux;
     }
 
     if (hasUiLibrary) {
       return FEATURE_STATES.uiLibrary;
     }
 
+    if (hasAuth && hasRedux) {
+      return FEATURE_STATES.authRedux;
+    }
+
     if (hasAuth) {
       return FEATURE_STATES.auth;
+    }
+
+    if (hasRedux) {
+      return FEATURE_STATES.redux;
     }
 
     return FEATURE_STATES.base;
@@ -242,24 +260,36 @@ export = class AddGenerator extends GeneratorBase {
     }
   }
 
-  _writeDependencies(dependencyMap: Record<string, string>): void {
-    const dependencies = { ...(this.rootPackageJson.dependencies || {}) };
+  _writePackageCollection(
+    fieldName: 'dependencies' | 'devDependencies',
+    dependencyMap: Record<string, string>,
+  ): void {
+    const packageCollection = { ...(this.rootPackageJson[fieldName] || {}) };
 
     Object.entries(dependencyMap).forEach(([name, version]) => {
-      if (typeof dependencies[name] !== 'string') {
-        dependencies[name] = version;
+      if (typeof packageCollection[name] !== 'string') {
+        packageCollection[name] = version;
       }
     });
 
     const updatedPackageJson = {
       ...this.rootPackageJson,
-      dependencies,
+      [fieldName]: packageCollection,
     };
 
+    this.rootPackageJson = updatedPackageJson;
     this.fs.write(
       this.packageJsonPath,
       `${JSON.stringify(updatedPackageJson, null, 2)}\n`,
     );
+  }
+
+  _writeDependencies(dependencyMap: Record<string, string>): void {
+    this._writePackageCollection('dependencies', dependencyMap);
+  }
+
+  _writeDevDependencies(dependencyMap: Record<string, string>): void {
+    this._writePackageCollection('devDependencies', dependencyMap);
   }
 
   _writeManagedFiles(
