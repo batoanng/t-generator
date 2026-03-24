@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from 'react';
 import { Auth0Provider } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
 import { env } from '@/shared/config';
 
 type AuthRedirectState = {
@@ -8,23 +7,15 @@ type AuthRedirectState = {
 };
 
 function getAuthorizationParams() {
-  const authorizationParams = {
+  return {
     redirect_uri: window.location.origin,
-    audience: undefined,
+    ...(env.auth0.audience ? { audience: env.auth0.audience } : {}),
   };
-
-  if (env.auth0.audience) {
-    authorizationParams.audience = env.auth0.audience;
-  }
-
-  return authorizationParams;
 }
 
 export function Auth0ProviderWithNavigate({
   children,
 }: PropsWithChildren) {
-  const navigate = useNavigate();
-
   if (!env.auth0.isConfigured) {
     return <>{children}</>;
   }
@@ -35,7 +26,10 @@ export function Auth0ProviderWithNavigate({
       clientId={env.auth0.clientId}
       authorizationParams={getAuthorizationParams()}
       onRedirectCallback={(appState?: AuthRedirectState) => {
-        navigate(appState?.returnTo || '/auth', { replace: true });
+        const returnTo = appState?.returnTo || '/auth';
+        const redirectUrl = new URL(returnTo, window.location.origin);
+
+        window.location.replace(redirectUrl.toString());
       }}
     >
       {children}
