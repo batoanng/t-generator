@@ -127,7 +127,8 @@ Install and link the generator locally:
 
 ```bash
 npm install
-npm link
+npm run build
+npm link ./dist
 ```
 
 If `yo` is not already available on your machine:
@@ -217,10 +218,18 @@ Work on the generator itself from this repository:
 npm install
 ```
 
-Run the test suite:
+Run the local checks against TypeScript source:
 
 ```bash
+npm run typecheck
+npm run lint
 npm test
+```
+
+Build and verify the staged publishable package:
+
+```bash
+npm run test:dist
 ```
 
 Create a changeset for release-worthy changes:
@@ -239,6 +248,13 @@ Publish the package after versioning:
 
 ```bash
 npm run release
+```
+
+Manual `yo` validation should use the staged package:
+
+```bash
+npm run build
+npm link ./dist
 ```
 
 ## Release automation

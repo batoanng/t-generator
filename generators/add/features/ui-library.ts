@@ -1,12 +1,12 @@
-const fs = require("node:fs");
-const { FEATURE_STATES } = require("../lib/constants");
-const {
-  addManagedFile,
-  appManagedFile,
-  hasPackageDependency,
-} = require("../lib/helpers");
+import fs from "node:fs";
 
-const UI_LIBRARY_MANAGED_FILES = {
+import { FEATURE_STATES, type FeatureState } from "../lib/constants";
+import { addManagedFile, appManagedFile, hasPackageDependency } from "../lib/helpers";
+
+import type { ManagedFile } from "../../lib/types";
+import type { FeatureDefinition } from "../lib/types";
+
+const UI_LIBRARY_MANAGED_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
   [FEATURE_STATES.base]: [
     appManagedFile(
       "src/app/providers/AppProviders.tsx",
@@ -44,7 +44,8 @@ const UI_LIBRARY_MANAGED_FILES = {
     ),
   ],
 };
-const UI_LIBRARY_OUTPUT_FILES = {
+
+const UI_LIBRARY_OUTPUT_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
   [FEATURE_STATES.base]: [
     addManagedFile(
       "src/app/providers/AppProviders.tsx",
@@ -82,6 +83,7 @@ const UI_LIBRARY_OUTPUT_FILES = {
     ),
   ],
 };
+
 const UI_LIBRARY_NEW_FILES = [
   addManagedFile(
     "src/widgets/ui-library-showcase/index.ts",
@@ -92,6 +94,7 @@ const UI_LIBRARY_NEW_FILES = [
     "ui-library/src/widgets/ui-library-showcase/ui/UiLibraryShowcase.tsx.ejs",
   ),
 ];
+
 const UI_LIBRARY_DEPENDENCIES = {
   "@batoanng/mui-components": "^3.0.30",
   "@emotion/react": "^11.13.5",
@@ -106,9 +109,10 @@ const UI_LIBRARY_DEPENDENCIES = {
   "react-hook-form": "7.44.3",
   "react-idle-timer": "^5.7.2",
 };
+
 const UI_LIBRARY_MANAGED_DIRECTORY = "src/widgets/ui-library-showcase";
 
-module.exports = {
+const uiLibraryFeature: FeatureDefinition = {
   name: "ui-library",
   label: "UI library",
   isInstalled(generator) {
@@ -118,7 +122,7 @@ module.exports = {
     );
   },
   validate(generator) {
-    if (this.isInstalled(generator)) {
+    if (this.isInstalled?.(generator)) {
       throw new Error(
         'UI library generation aborted because package.json already defines "@batoanng/mui-components".',
       );
@@ -138,14 +142,23 @@ module.exports = {
       );
     }
 
-    generator._validateManagedFiles("UI library", managedFiles, generator.projectState);
+    generator._validateManagedFiles(
+      "UI library",
+      managedFiles,
+      generator.projectState,
+    );
   },
   write(generator) {
+    const outputFiles = UI_LIBRARY_OUTPUT_FILES[generator.projectState];
+
+    if (!outputFiles) {
+      throw new Error(
+        `UI library generation aborted because the current project state "${generator.projectState}" is not supported.`,
+      );
+    }
+
     generator._writeDependencies(UI_LIBRARY_DEPENDENCIES);
-    generator._writeManagedFiles([
-      ...UI_LIBRARY_OUTPUT_FILES[generator.projectState],
-      ...UI_LIBRARY_NEW_FILES,
-    ]);
+    generator._writeManagedFiles([...outputFiles, ...UI_LIBRARY_NEW_FILES]);
   },
   end(generator) {
     generator.log(
@@ -156,3 +169,5 @@ module.exports = {
     generator.log("  npm run dev");
   },
 };
+
+export = uiLibraryFeature;

@@ -1,12 +1,12 @@
-const fs = require("node:fs");
-const { FEATURE_STATES } = require("../lib/constants");
-const {
-  addManagedFile,
-  appManagedFile,
-  hasPackageDependency,
-} = require("../lib/helpers");
+import fs from "node:fs";
 
-const AUTH_MANAGED_FILES = {
+import { FEATURE_STATES, type FeatureState } from "../lib/constants";
+import { addManagedFile, appManagedFile, hasPackageDependency } from "../lib/helpers";
+
+import type { ManagedFile } from "../../lib/types";
+import type { FeatureDefinition } from "../lib/types";
+
+const AUTH_MANAGED_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
   [FEATURE_STATES.base]: [
     appManagedFile(".env.example", "_env.example.ejs"),
     appManagedFile("src/vite-env.d.ts", "src/vite-env.d.ts.ejs"),
@@ -50,7 +50,8 @@ const AUTH_MANAGED_FILES = {
     ),
   ],
 };
-const AUTH_OUTPUT_FILES = {
+
+const AUTH_OUTPUT_FILES: Partial<Record<FeatureState, ManagedFile[]>> = {
   [FEATURE_STATES.base]: [
     addManagedFile(".env.example", "auth/_env.example.ejs"),
     addManagedFile("src/vite-env.d.ts", "auth/src/vite-env.d.ts.ejs"),
@@ -94,6 +95,7 @@ const AUTH_OUTPUT_FILES = {
     ),
   ],
 };
+
 const AUTH_NEW_FILES = [
   addManagedFile(
     "src/app/providers/auth/Auth0ProviderWithNavigate.tsx",
@@ -109,15 +111,14 @@ const AUTH_NEW_FILES = [
     "auth/src/pages/auth/ui/AuthPage.test.tsx.ejs",
   ),
 ];
+
 const AUTH_DEPENDENCIES = {
   "@auth0/auth0-react": "^2.8.0",
 };
-const AUTH_MANAGED_DIRECTORIES = [
-  "src/app/providers/auth",
-  "src/pages/auth",
-];
 
-module.exports = {
+const AUTH_MANAGED_DIRECTORIES = ["src/app/providers/auth", "src/pages/auth"] as const;
+
+const authFeature: FeatureDefinition = {
   name: "auth",
   label: "Auth",
   isInstalled(generator) {
@@ -129,7 +130,7 @@ module.exports = {
     );
   },
   validate(generator) {
-    if (this.isInstalled(generator)) {
+    if (this.isInstalled?.(generator)) {
       throw new Error(
         'Auth generation aborted because package.json already defines "@auth0/auth0-react".',
       );
@@ -156,11 +157,16 @@ module.exports = {
     generator._validateManagedFiles("Auth", managedFiles, generator.projectState);
   },
   write(generator) {
+    const outputFiles = AUTH_OUTPUT_FILES[generator.projectState];
+
+    if (!outputFiles) {
+      throw new Error(
+        `Auth generation aborted because the current project state "${generator.projectState}" is not supported.`,
+      );
+    }
+
     generator._writeDependencies(AUTH_DEPENDENCIES);
-    generator._writeManagedFiles([
-      ...AUTH_OUTPUT_FILES[generator.projectState],
-      ...AUTH_NEW_FILES,
-    ]);
+    generator._writeManagedFiles([...outputFiles, ...AUTH_NEW_FILES]);
   },
   end(generator) {
     generator.log('Auth feature scaffolded in "./src/pages/auth".');
@@ -171,3 +177,5 @@ module.exports = {
     generator.log("  Open /auth");
   },
 };
+
+export = authFeature;

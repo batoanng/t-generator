@@ -1,10 +1,18 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const assert = require("node:assert/strict");
-const test = require("node:test");
-const yoAssert = require("yeoman-assert");
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
 
-const generatorPath = path.join(__dirname, "../generators/app");
+import yoAssert from "yeoman-assert";
+
+import {
+  appGeneratorPath,
+  createYeomanTestHelpers,
+  readJson,
+} from "./helpers";
+
+import type { PackageJson } from "../generators/lib/types";
+
 const blockedDependencies = [
   "@batoanng/mui-components",
   "@emotion/react",
@@ -19,29 +27,19 @@ const blockedDependencies = [
   "notistack",
 ];
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
-
-async function createHelpers() {
-  const yeomanTest = await import("yeoman-test");
-
-  return yeomanTest.createHelpers();
-}
-
 test("generates the base app with the expected project structure", async () => {
-  let tmpDir;
-  const helpers = await createHelpers();
+  let tmpDir = "";
+  const helpers = await createYeomanTestHelpers();
 
   await helpers
-    .run(generatorPath)
+    .run(appGeneratorPath)
     .inTmpDir((directory) => {
       tmpDir = directory;
     })
     .withArguments(["starter-app"]);
 
   const projectRoot = path.join(tmpDir, "starter-app");
-  const packageJson = readJson(path.join(projectRoot, "package.json"));
+  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
 
   yoAssert.file([
     path.join(projectRoot, "package.json"),
@@ -65,7 +63,7 @@ test("generates the base app with the expected project structure", async () => {
     path.join(projectRoot, "src/test/setup.ts"),
   ]);
 
-  assert.deepEqual(Object.keys(packageJson.scripts), [
+  assert.deepEqual(Object.keys(packageJson.scripts || {}), [
     "dev",
     "build",
     "preview",
@@ -73,15 +71,15 @@ test("generates the base app with the expected project structure", async () => {
     "test",
   ]);
 
-  assert.deepEqual(Object.keys(packageJson.dependencies).sort(), [
+  assert.deepEqual(Object.keys(packageJson.dependencies || {}).sort(), [
     "react",
     "react-dom",
     "react-router-dom",
   ]);
 
   blockedDependencies.forEach((dependencyName) => {
-    assert.equal(packageJson.dependencies[dependencyName], undefined);
-    assert.equal(packageJson.devDependencies[dependencyName], undefined);
+    assert.equal(packageJson.dependencies?.[dependencyName], undefined);
+    assert.equal(packageJson.devDependencies?.[dependencyName], undefined);
   });
 
   [
@@ -117,10 +115,7 @@ test("generates the base app with the expected project structure", async () => {
     path.join(projectRoot, "src/pages/home/ui/HomePage.test.tsx"),
     "render(<HomePage />);",
   );
-  yoAssert.fileContent(
-    path.join(projectRoot, "README.md"),
-    "yo t-generator:add",
-  );
+  yoAssert.fileContent(path.join(projectRoot, "README.md"), "yo t-generator:add");
   yoAssert.fileContent(
     path.join(projectRoot, "README.md"),
     "yo t-generator:add auth",
@@ -128,11 +123,11 @@ test("generates the base app with the expected project structure", async () => {
 });
 
 test("prompts for the app name when one is not provided", async () => {
-  let tmpDir;
-  const helpers = await createHelpers();
+  let tmpDir = "";
+  const helpers = await createYeomanTestHelpers();
 
   await helpers
-    .run(generatorPath)
+    .run(appGeneratorPath)
     .inTmpDir((directory) => {
       tmpDir = directory;
     })
@@ -151,20 +146,22 @@ test("prompts for the app name when one is not provided", async () => {
 });
 
 test("fails when the target directory already exists and is not empty", async () => {
-  let tmpDir;
-  const helpers = await createHelpers();
+  let tmpDir = "";
+  const helpers = await createYeomanTestHelpers();
 
   await assert.rejects(
-    helpers
-      .run(generatorPath)
-      .inTmpDir((directory) => {
-        tmpDir = directory;
-        const targetDirectory = path.join(directory, "existing-app");
+    async () =>
+      helpers
+        .run(appGeneratorPath)
+        .inTmpDir((directory) => {
+          tmpDir = directory;
+          const targetDirectory = path.join(directory, "existing-app");
 
-        fs.mkdirSync(targetDirectory, { recursive: true });
-        fs.writeFileSync(path.join(targetDirectory, "keep.txt"), "existing");
-      })
-      .withArguments(["existing-app"]),
+          fs.mkdirSync(targetDirectory, { recursive: true });
+          fs.writeFileSync(path.join(targetDirectory, "keep.txt"), "existing");
+        })
+        .withArguments(["existing-app"])
+        .run(),
     /already exists and is not empty/,
   );
 

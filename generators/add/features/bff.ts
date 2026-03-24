@@ -1,20 +1,19 @@
-const fs = require("node:fs");
+import fs from "node:fs";
+
+import type { FeatureDefinition } from "../lib/types";
 
 const BFF_MANAGED_SCRIPTS = ["dev:client", "dev:server", "dev:full"];
 
-module.exports = {
+const bffFeature: FeatureDefinition = {
   name: "bff",
   label: "BFF",
   validate(generator) {
     if (fs.existsSync(generator.destinationPath("server"))) {
-      throw new Error(
-        'BFF generation aborted because "server/" already exists.',
-      );
+      throw new Error('BFF generation aborted because "server/" already exists.');
     }
 
     const existingManagedScripts = BFF_MANAGED_SCRIPTS.filter(
-      (scriptName) =>
-        typeof generator.rootPackageJson.scripts?.[scriptName] === "string",
+      (scriptName) => typeof generator.rootPackageJson.scripts?.[scriptName] === "string",
     );
 
     if (existingManagedScripts.length > 0) {
@@ -31,7 +30,7 @@ module.exports = {
       ["bff/server/_gitignore.ejs", "server/.gitignore"],
       ["bff/server/_env.development.ejs", "server/.env.development"],
       ["bff/server/_env.production.ejs", "server/.env.production"],
-    ];
+    ] as const;
 
     templateFiles.forEach(([from, to]) => {
       generator.fs.copyTpl(
@@ -45,7 +44,7 @@ module.exports = {
       ...generator.rootPackageJson,
       scripts: {
         ...generator.rootPackageJson.scripts,
-        "dev:client": generator.rootPackageJson.scripts.dev,
+        "dev:client": generator.rootPackageJson.scripts?.dev,
         "dev:server": "npm --prefix server run start",
         "dev:full":
           'concurrently -k -n client,server "npm run dev:client" "npm run dev:server"',
@@ -70,3 +69,5 @@ module.exports = {
     generator.log("  npm run dev:full");
   },
 };
+
+export = bffFeature;

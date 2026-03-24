@@ -1,11 +1,22 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const GeneratorModule = require("yeoman-generator");
+import fs from "node:fs";
+import path from "node:path";
 
-const Generator = GeneratorModule.default || GeneratorModule;
+import GeneratorBase from "yeoman-generator";
 
-function normalizeAppName(input) {
-  return String(input || "")
+import type { TemplateContext } from "../lib/types";
+
+interface AppGeneratorOptions extends GeneratorBase.GeneratorOptions {
+  appName?: string;
+}
+
+interface AppPromptAnswers extends GeneratorBase.Answers {
+  appName: string;
+}
+
+function normalizeAppName(input: unknown): string {
+  const normalizedInput = typeof input === "string" ? input : "";
+
+  return normalizedInput
     .trim()
     .toLowerCase()
     .replace(/['"]/g, "")
@@ -13,8 +24,8 @@ function normalizeAppName(input) {
     .replace(/^-+|-+$/g, "");
 }
 
-function toDisplayName(input, fallback) {
-  const trimmed = String(input || "").trim();
+function toDisplayName(input: unknown, fallback: string): string {
+  const trimmed = (typeof input === "string" ? input : "").trim();
 
   if (trimmed) {
     return trimmed;
@@ -27,8 +38,16 @@ function toDisplayName(input, fallback) {
     .join(" ");
 }
 
-module.exports = class AppGenerator extends Generator {
-  constructor(args, opts) {
+export = class AppGenerator extends GeneratorBase {
+  declare options: GeneratorBase["options"] & AppGeneratorOptions;
+
+  private rawAppName?: string;
+
+  private appName!: string;
+
+  private displayName!: string;
+
+  constructor(args: string | string[], opts: AppGeneratorOptions) {
     super(args, opts);
 
     this.argument("appName", {
@@ -40,12 +59,12 @@ module.exports = class AppGenerator extends Generator {
     this.rawAppName = this.options.appName;
   }
 
-  async prompting() {
+  async prompting(): Promise<void> {
     if (this.options.appName) {
       return;
     }
 
-    const answers = await this.prompt([
+    const answers = await this.prompt<AppPromptAnswers>([
       {
         type: "input",
         name: "appName",
@@ -65,7 +84,7 @@ module.exports = class AppGenerator extends Generator {
     this.options.appName = answers.appName;
   }
 
-  configuring() {
+  configuring(): void {
     const providedName = this.rawAppName || this.options.appName;
     const normalizedAppName = normalizeAppName(providedName);
 
@@ -83,12 +102,11 @@ module.exports = class AppGenerator extends Generator {
 
     this.appName = normalizedAppName;
     this.displayName = toDisplayName(providedName, normalizedAppName);
-    this.projectRoot = projectRoot;
     this.destinationRoot(projectRoot);
   }
 
-  writing() {
-    const templateContext = {
+  writing(): void {
+    const templateContext: TemplateContext = {
       appName: this.appName,
       appDisplayName: this.displayName,
     };
@@ -129,7 +147,7 @@ module.exports = class AppGenerator extends Generator {
       ["src/shared/ui/index.ts.ejs", "src/shared/ui/index.ts"],
       ["src/shared/api/index.ts.ejs", "src/shared/api/index.ts"],
       ["src/shared/lib/index.ts.ejs", "src/shared/lib/index.ts"],
-    ];
+    ] as const;
 
     templateFiles.forEach(([from, to]) => {
       this.fs.copyTpl(
@@ -144,7 +162,7 @@ module.exports = class AppGenerator extends Generator {
     });
   }
 
-  end() {
+  end(): void {
     this.log("");
     this.log(`Base app scaffolded in ./${this.appName}`);
     this.log("Next steps:");

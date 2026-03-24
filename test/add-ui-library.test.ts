@@ -1,49 +1,28 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const assert = require("node:assert/strict");
-const test = require("node:test");
-const yoAssert = require("yeoman-assert");
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
 
-const baseGeneratorPath = path.join(__dirname, "../generators/app");
-const addGeneratorPath = path.join(__dirname, "../generators/add");
+import yoAssert from "yeoman-assert";
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
+import {
+  addGeneratorPath,
+  createYeomanTestHelpers,
+  readJson,
+  scaffoldBaseApp,
+} from "./helpers";
 
-async function createHelpers() {
-  const yeomanTest = await import("yeoman-test");
-
-  return yeomanTest.createHelpers();
-}
-
-async function scaffoldBaseApp(appName) {
-  let tmpDir;
-  const helpers = await createHelpers();
-
-  const runResult = await helpers
-    .run(baseGeneratorPath)
-    .inTmpDir((directory) => {
-      tmpDir = directory;
-    })
-    .withArguments([appName]);
-
-  return {
-    runResult,
-    projectRoot: path.join(tmpDir, appName),
-    tmpDir,
-  };
-}
+import type { PackageJson } from "../generators/lib/types";
 
 test("adds the ui-library feature to an existing generated base app", async () => {
   const { projectRoot, runResult } = await scaffoldBaseApp("starter-app");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["ui-library"])
     .run();
 
-  const packageJson = readJson(path.join(projectRoot, "package.json"));
+  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
 
   yoAssert.file([
     path.join(projectRoot, "src/widgets/ui-library-showcase/index.ts"),
@@ -53,21 +32,21 @@ test("adds the ui-library feature to an existing generated base app", async () =
     ),
   ]);
 
-  assert.equal(packageJson.scripts.dev, "vite");
-  assert.equal(packageJson.scripts.build, "vite build");
-  assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
-  assert.equal(packageJson.dependencies["@emotion/react"], "^11.13.5");
-  assert.equal(packageJson.dependencies["@emotion/styled"], "^11.13.5");
-  assert.equal(packageJson.dependencies["@mui/icons-material"], "6.1.8");
-  assert.equal(packageJson.dependencies["@mui/material"], "6.1.8");
-  assert.equal(packageJson.dependencies["@mui/utils"], "^6.1.8");
-  assert.equal(packageJson.dependencies["@mui/x-date-pickers"], "7.22.2");
-  assert.equal(packageJson.dependencies["framer-motion"], "^12.23.24");
-  assert.equal(packageJson.dependencies["react-dropzone"], "^14.2.3");
-  assert.equal(packageJson.dependencies["react-easy-crop"], "^5.0.2");
-  assert.equal(packageJson.dependencies["react-hook-form"], "7.44.3");
-  assert.equal(packageJson.dependencies["react-idle-timer"], "^5.7.2");
-  assert.equal(packageJson.scripts["dev:full"], undefined);
+  assert.equal(packageJson.scripts?.dev, "vite");
+  assert.equal(packageJson.scripts?.build, "vite build");
+  assert.equal(packageJson.dependencies?.["@batoanng/mui-components"], "^3.0.30");
+  assert.equal(packageJson.dependencies?.["@emotion/react"], "^11.13.5");
+  assert.equal(packageJson.dependencies?.["@emotion/styled"], "^11.13.5");
+  assert.equal(packageJson.dependencies?.["@mui/icons-material"], "6.1.8");
+  assert.equal(packageJson.dependencies?.["@mui/material"], "6.1.8");
+  assert.equal(packageJson.dependencies?.["@mui/utils"], "^6.1.8");
+  assert.equal(packageJson.dependencies?.["@mui/x-date-pickers"], "7.22.2");
+  assert.equal(packageJson.dependencies?.["framer-motion"], "^12.23.24");
+  assert.equal(packageJson.dependencies?.["react-dropzone"], "^14.2.3");
+  assert.equal(packageJson.dependencies?.["react-easy-crop"], "^5.0.2");
+  assert.equal(packageJson.dependencies?.["react-hook-form"], "7.44.3");
+  assert.equal(packageJson.dependencies?.["react-idle-timer"], "^5.7.2");
+  assert.equal(packageJson.scripts?.["dev:full"], undefined);
   assert.equal(packageJson.devDependencies?.concurrently, undefined);
 
   yoAssert.fileContent(
@@ -103,7 +82,7 @@ test("prompt-based add can select the ui-library feature", async () => {
   const { projectRoot, runResult } = await scaffoldBaseApp("prompted-ui");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withPrompts({ featureName: "ui-library" })
     .run();
 
@@ -117,42 +96,45 @@ test("ui-library can be added after bff without re-running bff checks", async ()
   const { projectRoot, runResult } = await scaffoldBaseApp("stacked-features");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["bff"])
     .run();
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["ui-library"])
     .run();
 
-  const packageJson = readJson(path.join(projectRoot, "package.json"));
+  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
 
   yoAssert.file([
     path.join(projectRoot, "server/package.json"),
     path.join(projectRoot, "src/widgets/ui-library-showcase/index.ts"),
   ]);
-  assert.equal(packageJson.scripts["dev:full"], 'concurrently -k -n client,server "npm run dev:client" "npm run dev:server"');
-  assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
+  assert.equal(
+    packageJson.scripts?.["dev:full"],
+    'concurrently -k -n client,server "npm run dev:client" "npm run dev:server"',
+  );
+  assert.equal(packageJson.dependencies?.["@batoanng/mui-components"], "^3.0.30");
 });
 
 test("ui-library can be added after auth without removing auth wiring", async () => {
   const { projectRoot, runResult } = await scaffoldBaseApp("auth-first-ui");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["auth"])
     .run();
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["ui-library"])
     .run();
 
-  const packageJson = readJson(path.join(projectRoot, "package.json"));
+  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
 
-  assert.equal(packageJson.dependencies["@auth0/auth0-react"], "^2.8.0");
-  assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
+  assert.equal(packageJson.dependencies?.["@auth0/auth0-react"], "^2.8.0");
+  assert.equal(packageJson.dependencies?.["@batoanng/mui-components"], "^3.0.30");
 
   yoAssert.fileContent(
     path.join(projectRoot, "src/app/providers/AppProviders.tsx"),
@@ -173,33 +155,35 @@ test("ui-library can be added after auth without removing auth wiring", async ()
 });
 
 test("fails when ui-library is generated outside the t-generator base app", async () => {
-  let tmpDir;
-  const helpers = await createHelpers();
+  let tmpDir = "";
+  const helpers = await createYeomanTestHelpers();
 
   await assert.rejects(
-    helpers
-      .run(addGeneratorPath)
-      .inTmpDir((directory) => {
-        tmpDir = directory;
-        fs.writeFileSync(
-          path.join(directory, "package.json"),
-          JSON.stringify(
-            {
-              name: "custom-app",
-              scripts: {
-                dev: "vite",
-                build: "vite build",
-                preview: "vite preview",
-                lint: "eslint src",
-                test: "vitest run",
+    async () =>
+      helpers
+        .run(addGeneratorPath)
+        .inTmpDir((directory) => {
+          tmpDir = directory;
+          fs.writeFileSync(
+            path.join(directory, "package.json"),
+            JSON.stringify(
+              {
+                name: "custom-app",
+                scripts: {
+                  dev: "vite",
+                  build: "vite build",
+                  preview: "vite preview",
+                  lint: "eslint src",
+                  test: "vitest run",
+                },
               },
-            },
-            null,
-            2,
-          ),
-        );
-      })
-      .withArguments(["ui-library"]),
+              null,
+              2,
+            ),
+          );
+        })
+        .withArguments(["ui-library"])
+        .run(),
     /UI library can only be generated inside a t-generator base app/,
   );
 
@@ -213,13 +197,13 @@ test("fails when ui-library generation would overwrite existing ui-library wirin
   const { projectRoot, runResult } = await scaffoldBaseApp("repeatable-ui");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["ui-library"])
     .run();
 
   await assert.rejects(
     runResult
-      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
       .withArguments(["ui-library"])
       .run(),
     /@batoanng\/mui-components/,
@@ -231,7 +215,7 @@ test("fails clearly for unknown feature names", async () => {
 
   await assert.rejects(
     runResult
-      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
       .withArguments(["theme"])
       .run(),
     /Supported features: bff, ui-library, auth/,

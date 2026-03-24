@@ -1,52 +1,31 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const assert = require("node:assert/strict");
-const test = require("node:test");
-const yoAssert = require("yeoman-assert");
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
 
-const baseGeneratorPath = path.join(__dirname, "../generators/app");
-const addGeneratorPath = path.join(__dirname, "../generators/add");
+import yoAssert from "yeoman-assert";
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
+import {
+  addGeneratorPath,
+  createYeomanTestHelpers,
+  readJson,
+  scaffoldBaseApp,
+} from "./helpers";
 
-async function createHelpers() {
-  const yeomanTest = await import("yeoman-test");
-
-  return yeomanTest.createHelpers();
-}
-
-async function scaffoldBaseApp(appName) {
-  let tmpDir;
-  const helpers = await createHelpers();
-
-  const runResult = await helpers
-    .run(baseGeneratorPath)
-    .inTmpDir((directory) => {
-      tmpDir = directory;
-    })
-    .withArguments([appName]);
-
-  return {
-    runResult,
-    projectRoot: path.join(tmpDir, appName),
-    tmpDir,
-  };
-}
+import type { PackageJson } from "../generators/lib/types";
 
 test("adds the auth feature to an existing generated base app", async () => {
   const { projectRoot, runResult } = await scaffoldBaseApp("starter-auth");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["auth"])
     .run();
 
-  const packageJson = readJson(path.join(projectRoot, "package.json"));
+  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
 
-  assert.equal(packageJson.dependencies["@auth0/auth0-react"], "^2.8.0");
-  assert.equal(packageJson.dependencies["@batoanng/mui-components"], undefined);
+  assert.equal(packageJson.dependencies?.["@auth0/auth0-react"], "^2.8.0");
+  assert.equal(packageJson.dependencies?.["@batoanng/mui-components"], undefined);
 
   yoAssert.file([
     path.join(projectRoot, "src/app/providers/auth/Auth0ProviderWithNavigate.tsx"),
@@ -55,10 +34,7 @@ test("adds the auth feature to an existing generated base app", async () => {
     path.join(projectRoot, "src/pages/auth/ui/AuthPage.test.tsx"),
   ]);
 
-  yoAssert.fileContent(
-    path.join(projectRoot, ".env.example"),
-    "VITE_AUTH0_DOMAIN=",
-  );
+  yoAssert.fileContent(path.join(projectRoot, ".env.example"), "VITE_AUTH0_DOMAIN=");
   yoAssert.fileContent(
     path.join(projectRoot, ".env.example"),
     "VITE_AUTH0_CLIENT_ID=",
@@ -89,7 +65,7 @@ test("prompt-based add can select the auth feature", async () => {
   const { projectRoot, runResult } = await scaffoldBaseApp("prompted-auth");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withPrompts({ featureName: "auth" })
     .run();
 
@@ -103,19 +79,19 @@ test("auth can be added after ui-library without removing theme wiring", async (
   const { projectRoot, runResult } = await scaffoldBaseApp("ui-first-auth");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["ui-library"])
     .run();
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["auth"])
     .run();
 
-  const packageJson = readJson(path.join(projectRoot, "package.json"));
+  const packageJson = readJson<PackageJson>(path.join(projectRoot, "package.json"));
 
-  assert.equal(packageJson.dependencies["@auth0/auth0-react"], "^2.8.0");
-  assert.equal(packageJson.dependencies["@batoanng/mui-components"], "^3.0.30");
+  assert.equal(packageJson.dependencies?.["@auth0/auth0-react"], "^2.8.0");
+  assert.equal(packageJson.dependencies?.["@batoanng/mui-components"], "^3.0.30");
 
   yoAssert.fileContent(
     path.join(projectRoot, "src/app/providers/AppProviders.tsx"),
@@ -136,33 +112,35 @@ test("auth can be added after ui-library without removing theme wiring", async (
 });
 
 test("fails when auth is generated outside the t-generator base app", async () => {
-  let tmpDir;
-  const helpers = await createHelpers();
+  let tmpDir = "";
+  const helpers = await createYeomanTestHelpers();
 
   await assert.rejects(
-    helpers
-      .run(addGeneratorPath)
-      .inTmpDir((directory) => {
-        tmpDir = directory;
-        fs.writeFileSync(
-          path.join(directory, "package.json"),
-          JSON.stringify(
-            {
-              name: "custom-app",
-              scripts: {
-                dev: "vite",
-                build: "vite build",
-                preview: "vite preview",
-                lint: "eslint src",
-                test: "vitest run",
+    async () =>
+      helpers
+        .run(addGeneratorPath)
+        .inTmpDir((directory) => {
+          tmpDir = directory;
+          fs.writeFileSync(
+            path.join(directory, "package.json"),
+            JSON.stringify(
+              {
+                name: "custom-app",
+                scripts: {
+                  dev: "vite",
+                  build: "vite build",
+                  preview: "vite preview",
+                  lint: "eslint src",
+                  test: "vitest run",
+                },
               },
-            },
-            null,
-            2,
-          ),
-        );
-      })
-      .withArguments(["auth"]),
+              null,
+              2,
+            ),
+          );
+        })
+        .withArguments(["auth"])
+        .run(),
     /Auth can only be generated inside a t-generator base app/,
   );
 
@@ -173,13 +151,13 @@ test("fails when auth generation would overwrite existing auth wiring", async ()
   const { projectRoot, runResult } = await scaffoldBaseApp("repeatable-auth");
 
   await runResult
-    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+    .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
     .withArguments(["auth"])
     .run();
 
   await assert.rejects(
     runResult
-      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false })
+      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
       .withArguments(["auth"])
       .run(),
     /@auth0\/auth0-react/,

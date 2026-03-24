@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Yeoman generator for bootstrapping a base React + TypeScript + Vite app with Feature-Sliced Design foundations.",
   "type": "commonjs",
-  "main": "generators/app/index.js",
+  "main": "generators/app/index.ts",
   "files": [
     "generators",
     "README.md"
@@ -20,15 +20,25 @@
   },
   "scripts": {
     "changeset": "changeset",
-    "test": "node --test \"test/**/*.test.js\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"generators/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.ts\"",
+    "test": "tsx --test \"test/**/*.test.ts\"",
+    "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json && tsx scripts/stage-dist.ts",
+    "test:dist": "npm run build && DIST_SMOKE=1 TEST_TARGET=dist tsx --test \"test/dist-package.test.ts\"",
     "version-packages": "changeset version",
-    "release": "changeset publish"
+    "release": "npm run test:dist && npm publish ./dist"
   },
   "dependencies": {
     "yeoman-generator": "^5.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.9.0",
     "@changesets/cli": "^2.30.0",
+    "eslint": "^9.39.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
     "yeoman-assert": "^3.1.1",
     "yeoman-test": "^7.1.0"
   }

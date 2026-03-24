@@ -1,15 +1,18 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const GeneratorModule = require("yeoman-generator");
-const authFeature = require("./features/auth");
-const bffFeature = require("./features/bff");
-const uiLibraryFeature = require("./features/ui-library");
-const {
+import fs from "node:fs";
+import path from "node:path";
+
+import GeneratorBase from "yeoman-generator";
+
+import authFeature from "./features/auth";
+import bffFeature from "./features/bff";
+import uiLibraryFeature from "./features/ui-library";
+import {
   FEATURE_STATES,
   REQUIRED_BASE_FILES,
   REQUIRED_BASE_SCRIPTS,
-} = require("./lib/constants");
-const {
+  type FeatureState,
+} from "./lib/constants";
+import {
   normalizeFeatureName,
   normalizeLineEndings,
   readAppDisplayName,
@@ -17,9 +20,19 @@ const {
   renderTemplateFile,
   resolveTemplateAbsolutePath,
   toDisplayName,
-} = require("./lib/helpers");
+} from "./lib/helpers";
 
-const Generator = GeneratorModule.default || GeneratorModule;
+import type { PackageJson } from "../lib/types";
+import type { FeatureDefinition } from "./lib/types";
+
+interface AddGeneratorOptions extends GeneratorBase.GeneratorOptions {
+  featureName?: string;
+}
+
+interface FeaturePromptAnswers extends GeneratorBase.Answers {
+  featureName: string;
+}
+
 const FEATURES = [bffFeature, uiLibraryFeature, authFeature];
 const FEATURE_BY_NAME = new Map(
   FEATURES.map((featureDefinition) => [featureDefinition.name, featureDefinition]),
@@ -28,12 +41,37 @@ const SUPPORTED_FEATURES = FEATURES.map(
   (featureDefinition) => featureDefinition.name,
 );
 
-function getFeatureLabel(featureName) {
+function getFeatureLabel(featureName: string): string {
   return FEATURE_BY_NAME.get(featureName)?.label || `Feature "${featureName}"`;
 }
 
-module.exports = class AddGenerator extends Generator {
-  constructor(args, opts) {
+export = class AddGenerator extends GeneratorBase {
+  declare options: GeneratorBase["options"] & AddGeneratorOptions;
+
+  featureName!: string;
+
+  featureDefinition!: FeatureDefinition;
+
+  projectRoot!: string;
+
+  packageJsonPath!: string;
+
+  envExamplePath!: string;
+
+  rootPackageJson!: PackageJson;
+
+  appName!: string;
+
+  appDisplayName!: string;
+
+  templateContext!: {
+    appName: string;
+    appDisplayName: string;
+  };
+
+  projectState!: FeatureState;
+
+  constructor(args: string | string[], opts: AddGeneratorOptions) {
     super(args, opts);
 
     this.argument("featureName", {
@@ -43,12 +81,12 @@ module.exports = class AddGenerator extends Generator {
     });
   }
 
-  async prompting() {
+  async prompting(): Promise<void> {
     if (this.options.featureName) {
       return;
     }
 
-    const answers = await this.prompt([
+    const answers = await this.prompt<FeaturePromptAnswers>([
       {
         type: "list",
         name: "featureName",
@@ -60,16 +98,17 @@ module.exports = class AddGenerator extends Generator {
     this.options.featureName = answers.featureName;
   }
 
-  configuring() {
+  configuring(): void {
     this.featureName = normalizeFeatureName(this.options.featureName);
-    this.featureDefinition = FEATURE_BY_NAME.get(this.featureName);
+    const featureDefinition = FEATURE_BY_NAME.get(this.featureName);
 
-    if (!this.featureDefinition) {
+    if (!featureDefinition) {
       throw new Error(
         `Unknown feature "${this.featureName}". Supported features: ${SUPPORTED_FEATURES.join(", ")}.`,
       );
     }
 
+    this.featureDefinition = featureDefinition;
     this.projectRoot = this.destinationRoot();
     this.packageJsonPath = this.destinationPath("package.json");
     this.envExamplePath = this.destinationPath(".env.example");
@@ -90,7 +129,7 @@ module.exports = class AddGenerator extends Generator {
     this.featureDefinition.validate(this);
   }
 
-  _validateBaseApp() {
+  _validateBaseApp(): PackageJson {
     const featureLabel = getFeatureLabel(this.featureName);
 
     if (!fs.existsSync(this.packageJsonPath)) {
@@ -99,13 +138,15 @@ module.exports = class AddGenerator extends Generator {
       );
     }
 
-    let packageJson;
+    let packageJson: PackageJson;
 
     try {
-      packageJson = readJson(this.packageJsonPath);
+      packageJson = readJson<PackageJson>(this.packageJsonPath);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
       throw new Error(
-        `${featureLabel} can only be generated inside a t-generator base app. Unable to read package.json: ${error.message}`,
+        `${featureLabel} can only be generated inside a t-generator base app. Unable to read package.json: ${message}`,
       );
     }
 
@@ -117,7 +158,7 @@ module.exports = class AddGenerator extends Generator {
     );
 
     if (missingScripts.length > 0 || missingFiles.length > 0) {
-      const details = [];
+      const details: string[] = [];
 
       if (missingScripts.length > 0) {
         details.push(`missing scripts: ${missingScripts.join(", ")}`);
@@ -135,9 +176,9 @@ module.exports = class AddGenerator extends Generator {
     return packageJson;
   }
 
-  _detectProjectState() {
-    const hasUiLibrary = uiLibraryFeature.isInstalled(this);
-    const hasAuth = authFeature.isInstalled(this);
+  _detectProjectState(): FeatureState {
+    const hasUiLibrary = uiLibraryFeature.isInstalled?.(this) ?? false;
+    const hasAuth = authFeature.isInstalled?.(this) ?? false;
 
     if (hasUiLibrary && hasAuth) {
       return FEATURE_STATES.uiLibraryAuth;
@@ -154,7 +195,11 @@ module.exports = class AddGenerator extends Generator {
     return FEATURE_STATES.base;
   }
 
-  _validateManagedFiles(featureLabel, managedFiles, stateLabel) {
+  _validateManagedFiles(
+    featureLabel: string,
+    managedFiles: { path: string; templatePath: string; templateSource: "app" | "add" }[],
+    stateLabel: string,
+  ): void {
     const missingManagedFiles = managedFiles
       .map(({ path: filePath }) => filePath)
       .filter((filePath) => !fs.existsSync(this.destinationPath(filePath)));
@@ -189,7 +234,7 @@ module.exports = class AddGenerator extends Generator {
     }
   }
 
-  _writeDependencies(dependencyMap) {
+  _writeDependencies(dependencyMap: Record<string, string>): void {
     const dependencies = { ...(this.rootPackageJson.dependencies || {}) };
 
     Object.entries(dependencyMap).forEach(([name, version]) => {
@@ -209,7 +254,13 @@ module.exports = class AddGenerator extends Generator {
     );
   }
 
-  _writeManagedFiles(templateDefinitions) {
+  _writeManagedFiles(
+    templateDefinitions: {
+      path: string;
+      templatePath: string;
+      templateSource: "app" | "add";
+    }[],
+  ): void {
     templateDefinitions.forEach((templateDefinition) => {
       this.fs.write(
         this.destinationPath(templateDefinition.path),
@@ -221,11 +272,11 @@ module.exports = class AddGenerator extends Generator {
     });
   }
 
-  writing() {
+  writing(): void {
     this.featureDefinition.write(this);
   }
 
-  end() {
+  end(): void {
     this.log("");
     this.featureDefinition.end(this);
   }
