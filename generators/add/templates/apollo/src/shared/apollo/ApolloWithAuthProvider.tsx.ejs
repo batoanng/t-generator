@@ -1,0 +1,54 @@
+import type { PropsWithChildren } from 'react';
+import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from '@apollo/client';
+import { CombinedGraphQLErrors, CombinedProtocolErrors } from '@apollo/client/errors';
+import { ErrorLink } from '@apollo/client/link/error';
+import { ApolloProvider } from '@apollo/client/react';
+import { useMemo } from 'react';
+import { env } from '@/shared/config';
+
+const errorLink = new ErrorLink(({ error }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    error.errors.forEach(({ message, locations, path }) => {
+      console.error(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+      );
+    });
+
+    return;
+  }
+
+  if (CombinedProtocolErrors.is(error)) {
+    error.errors.forEach(({ message, extensions }) => {
+      console.error(
+        `[Protocol error]: Message: ${message}, Extensions: ${JSON.stringify(extensions)}`,
+      );
+    });
+
+    return;
+  }
+
+  console.error(`[Network error]: ${error}`);
+});
+
+function createApolloClient(link: ApolloLink) {
+  return new ApolloClient({
+    link,
+    cache: new InMemoryCache({}),
+  });
+}
+
+function createHttpLink() {
+  return new HttpLink({
+    uri: env.graphqlUrl,
+    credentials: 'include',
+  });
+}
+
+export function ApolloWithAuthProvider({ children }: PropsWithChildren) {
+  const client = useMemo(
+    () => createApolloClient(ApolloLink.from([errorLink, createHttpLink()])),
+    [],
+  );
+
+  return <ApolloProvider client={client}>{children}</ApolloProvider>;
+}

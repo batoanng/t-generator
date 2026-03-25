@@ -9,6 +9,7 @@ export interface InstalledFeatures {
   uiLibrary: boolean;
   redux: boolean;
   reactQuery: boolean;
+  apollo: boolean;
 }
 
 export interface AddGeneratorContext {

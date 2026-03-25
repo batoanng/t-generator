@@ -27,6 +27,7 @@ const blockedDependencies = [
   'redux-logger',
   'redux-persist',
   'axios',
+  'graphql',
   'vite-plugin-pwa',
   'notistack',
 ];
@@ -114,6 +115,8 @@ test('generates the base app with the expected project structure', async () => {
     fs.existsSync(path.join(projectRoot, 'src/pages/react-query')),
     false,
   );
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/pages/apollo')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/shared/apollo')), false);
 
   yoAssert.fileContent(
     path.join(projectRoot, 'src/shared/config/env.ts'),
@@ -142,6 +145,10 @@ test('generates the base app with the expected project structure', async () => {
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
     'yo t-generator:add react-query',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'README.md'),
+    'yo t-generator:add apollo',
   );
 });
 

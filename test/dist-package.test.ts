@@ -32,6 +32,10 @@ distSmokeTest(
       path.join(distRoot, 'generators/app/templates/package.json.ejs'),
       path.join(distRoot, 'generators/add/index.js'),
       path.join(distRoot, 'generators/add/templates/auth/_env.example.ejs'),
+      path.join(
+        distRoot,
+        'generators/add/templates/apollo/src/shared/apollo/ApolloWithAuthProvider.tsx.ejs',
+      ),
       path.join(distRoot, 'generators/add/templates/bff/server/server.js.ejs'),
       path.join(distRoot, 'generators/add/templates/redux/src/app/store/index.ts.ejs'),
       path.join(
@@ -59,12 +63,12 @@ distSmokeTest(
 
     await runResult
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
-      .withArguments(['react-query'])
+      .withArguments(['apollo'])
       .run();
 
     yoAssert.file([
-      path.join(projectRoot, 'src/shared/api/createQueryClient.ts'),
-      path.join(projectRoot, 'src/pages/react-query/index.ts'),
+      path.join(projectRoot, 'src/shared/apollo/index.ts'),
+      path.join(projectRoot, 'src/pages/apollo/index.ts'),
     ]);
   },
 );

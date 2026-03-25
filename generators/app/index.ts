@@ -150,6 +150,7 @@ export = class AppGenerator extends GeneratorBase {
       uiLibrary: false,
       redux: false,
       reactQuery: false,
+      apollo: false,
     });
 
     Object.entries(sharedScaffold).forEach(([filePath, contents]) => {

@@ -168,6 +168,7 @@ yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
+yo t-generator:add apollo
 ```
 
 Responsibilities:
@@ -185,6 +186,7 @@ Prompt order for the current implementation:
 3. `auth`
 4. `redux`
 5. `react-query`
+6. `apollo`
 
 ### 7.3 Test command
 
@@ -425,14 +427,23 @@ Purpose:
 
 Responsibilities:
 
-- install Apollo client dependencies
-- create Apollo provider setup
-- add a minimal GraphQL client configuration
+- install `@apollo/client` and `graphql`
+- extend generated env handling with `VITE_GRAPHQL_URL`
+- create route-level Apollo provider setup under `src/shared/apollo`
+- add a minimal Apollo client configuration with `HttpLink`, `ErrorLink`, and `InMemoryCache`
+- generate a schema-agnostic example query built around `query ApolloDemoRootType { __typename }`
+- generate a feature-level example hook under `src/features/apollo-demo`
+- add a generated `/apollo` example page
+- add a main-page link to open the Apollo example
 - support auth token injection if `auth` is already installed
+- validate existing managed files before writing Apollo changes
 
 Notes:
 
-- This feature should work independently, but offer integration points with `auth`.
+- The Apollo provider should be mounted at the route layer so it stays under Auth0 when `auth` is installed.
+- The feature should work on the base app and also compose with `auth`, `redux`, `react-query`, and `ui-library` in either order.
+- The generated GraphQL URL should default to `VITE_GRAPHQL_URL=/graphql`.
+- The generated example route should explain the setup and also execute the demo query by default.
 
 ### 9.6 `redux`
 
@@ -503,6 +514,7 @@ Feature generators should compose cleanly.
 - `ui-library` and `auth` must compose without a required order
 - `redux` must compose cleanly with both `auth` and `ui-library`
 - `react-query` must compose cleanly with `auth`, `redux`, and `ui-library`
+- `apollo` must compose cleanly with `auth`, `redux`, `react-query`, and `ui-library`
 - `notifications` may extend the provider tree created by `ui-library`
 - `bff` may add scripts without disrupting existing frontend scripts
 
@@ -529,6 +541,7 @@ Examples:
 - `ui-library`: render with provider
 - `auth`: provider and `/auth` page smoke test
 - `react-query`: query client and `/react-query` page smoke test
+- `apollo`: provider and `/apollo` page smoke test
 - `redux`: store or slice smoke test
 - `bff`: server boot or config smoke test where practical
 
@@ -584,5 +597,6 @@ The first implementation pass should prioritize:
 4. auth
 5. redux
 6. react-query
+7. apollo
 
 The remaining features can follow after the core generation flow is stable.

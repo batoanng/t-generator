@@ -20,6 +20,7 @@ The interactive flow currently offers, in order:
 - `auth`
 - `redux`
 - `react-query`
+- `apollo`
 
 You can also call a feature directly when needed:
 
@@ -29,6 +30,7 @@ yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
+yo t-generator:add apollo
 ```
 
 ## UI
@@ -54,6 +56,13 @@ generated app's FSD-oriented `app` layer.
 The `react-query` feature adds a shared QueryClient, React Query Devtools,
 Axios-based API helpers, generic `useApiQuery` and `useApiMutation` wrappers,
 and a generated `/react-query` example route linked from the home screen.
+
+## Apollo
+
+The `apollo` feature adds a route-level Apollo provider, a shared GraphQL
+client setup under `src/shared/apollo`, a generated `__typename` example query
+hook under `src/features/apollo-demo`, and a generated `/apollo` example route
+linked from the home screen.
 
 ## Scripts
 

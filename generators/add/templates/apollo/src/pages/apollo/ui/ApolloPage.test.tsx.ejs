@@ -1,0 +1,69 @@
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AppProviders } from '@/app/providers';
+import { ApolloPage } from './ApolloPage';
+
+const mockUseApolloDemoRootTypeQuery = vi.fn();
+
+vi.mock('@/features/apollo-demo', () => ({
+  useApolloDemoRootTypeQuery: () => mockUseApolloDemoRootTypeQuery(),
+}));
+
+describe('ApolloPage', () => {
+  beforeEach(() => {
+    mockUseApolloDemoRootTypeQuery.mockReset();
+  });
+
+  it('renders the generated Apollo setup guidance', () => {
+    mockUseApolloDemoRootTypeQuery.mockReturnValue({
+      data: { __typename: 'Query' },
+      error: undefined,
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <AppProviders>
+          <ApolloPage />
+        </AppProviders>
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: /Apollo client and demo query are wired in/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Default GraphQL URL/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('src/features/apollo-demo/model/queries.ts'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Query root typename/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Return to the home page/i }),
+    ).toHaveAttribute('href', '/');
+  });
+
+  it('renders query errors from the generated hook', () => {
+    mockUseApolloDemoRootTypeQuery.mockReturnValue({
+      data: undefined,
+      error: new Error('Connection failed'),
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <AppProviders>
+          <ApolloPage />
+        </AppProviders>
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole('alert'),
+    ).toHaveTextContent('Apollo request failed: Connection failed');
+  });
+});

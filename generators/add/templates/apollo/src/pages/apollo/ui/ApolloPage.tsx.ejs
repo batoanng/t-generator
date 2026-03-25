@@ -1,0 +1,75 @@
+import { Link } from 'react-router-dom';
+import { useApolloDemoRootTypeQuery } from '@/features/apollo-demo';
+import { env } from '@/shared/config';
+
+const generatedFiles = [
+  'src/shared/apollo/ApolloWithAuthProvider.tsx',
+  'src/features/apollo-demo/model/queries.ts',
+  'src/features/apollo-demo/api/useApolloDemoRootTypeQuery.ts',
+  'src/pages/apollo/ui/ApolloPage.tsx',
+];
+
+const demoQuery = `query ApolloDemoRootType {
+  __typename
+}`;
+
+export function ApolloPage() {
+  const { data, error, loading } = useApolloDemoRootTypeQuery();
+
+  return (
+    <main className="page">
+      <section className="hero">
+        <p className="eyebrow">Apollo example</p>
+        <h1>Apollo client and demo query are wired in</h1>
+        <p>
+          This route documents the generated Apollo setup and immediately runs a
+          small GraphQL query against your configured endpoint.
+        </p>
+        <p>
+          Default GraphQL URL: <code>{env.graphqlUrl}</code>
+        </p>
+        <p>
+          The provider is mounted at the router level so it can compose cleanly
+          with the existing app shell and sit under Auth0 when the auth feature
+          is installed.
+        </p>
+        <pre>
+          <code>{demoQuery}</code>
+        </pre>
+        <p>
+          Replace the demo query and hook with schema-specific operations once
+          your backend contract is ready.
+        </p>
+        <ul>
+          {generatedFiles.map((filePath) => (
+            <li key={filePath}>
+              <code>{filePath}</code>
+            </li>
+          ))}
+        </ul>
+        <section aria-live="polite">
+          <h2>Live query result</h2>
+          {loading ? (
+            <p>
+              Running the generated <code>__typename</code> query...
+            </p>
+          ) : null}
+          {error ? (
+            <p role="alert">Apollo request failed: {error.message}</p>
+          ) : null}
+          {data ? (
+            <p>
+              Query root typename: <code>{data.__typename}</code>
+            </p>
+          ) : null}
+          {!loading && !error && !data ? (
+            <p>No result was returned for the generated demo query.</p>
+          ) : null}
+        </section>
+        <p>
+          <Link to="/">Return to the home page</Link>
+        </p>
+      </section>
+    </main>
+  );
+}

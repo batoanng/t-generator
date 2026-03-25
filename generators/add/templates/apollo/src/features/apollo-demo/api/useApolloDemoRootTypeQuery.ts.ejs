@@ -1,0 +1,13 @@
+import type { QueryResult } from '@apollo/client/react';
+import { useQuery } from '@apollo/client/react';
+import {
+  APOLLO_DEMO_ROOT_TYPE_QUERY,
+  type ApolloDemoRootTypeData,
+} from '../model';
+
+export function useApolloDemoRootTypeQuery(): QueryResult<ApolloDemoRootTypeData> {
+  return useQuery<ApolloDemoRootTypeData>(APOLLO_DEMO_ROOT_TYPE_QUERY, {
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
+  });
+}

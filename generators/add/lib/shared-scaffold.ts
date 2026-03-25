@@ -42,6 +42,10 @@ function renderEnvExample(
     lines.push('VITE_API_BASE_URL=/api');
   }
 
+  if (features.apollo) {
+    lines.push('VITE_GRAPHQL_URL=/graphql');
+  }
+
   return `${lines.join('\n')}\n`;
 }
 
@@ -62,6 +66,10 @@ function renderViteEnv(features: InstalledFeatures): string {
 
   if (features.reactQuery) {
     lines.push('  readonly VITE_API_BASE_URL?: string;');
+  }
+
+  if (features.apollo) {
+    lines.push('  readonly VITE_GRAPHQL_URL?: string;');
   }
 
   lines.push('}');
@@ -104,6 +112,12 @@ function renderEnvConfig(
   if (features.reactQuery) {
     envLines.push(
       "apiBaseUrl: import.meta.env.VITE_API_BASE_URL?.trim() || '/api',",
+    );
+  }
+
+  if (features.apollo) {
+    envLines.push(
+      "graphqlUrl: import.meta.env.VITE_GRAPHQL_URL?.trim() || '/graphql',",
     );
   }
 
@@ -250,6 +264,11 @@ function renderAppRouter(features: InstalledFeatures): string {
     imports.push("import { ReactQueryPage } from '@/pages/react-query';");
   }
 
+  if (features.apollo) {
+    imports.push("import { ApolloPage } from '@/pages/apollo';");
+    imports.push("import { ApolloWithAuthProvider } from '@/shared/apollo';");
+  }
+
   const routeLines = ['<Route path="/" element={<HomePage />} />'];
 
   if (features.auth) {
@@ -266,12 +285,26 @@ function renderAppRouter(features: InstalledFeatures): string {
     );
   }
 
+  if (features.apollo) {
+    routeLines.push('<Route path="/apollo" element={<ApolloPage />} />');
+  }
+
   routeLines.push('<Route path="*" element={<Navigate replace to="/" />} />');
 
-  return `${imports.join('\n')}\n\nexport function AppRouter() {\n  return (\n    <Routes>\n${indent(
-    routeLines.join('\n'),
-    6,
-  )}\n    </Routes>\n  );\n}\n`;
+  let routerLines = ['<Routes>', ...routeLines, '</Routes>'];
+
+  if (features.apollo) {
+    routerLines = wrapWithProvider(
+      '<ApolloWithAuthProvider>',
+      '</ApolloWithAuthProvider>',
+      routerLines,
+    );
+  }
+
+  return `${imports.join('\n')}\n\nexport function AppRouter() {\n  return (\n${indent(
+    routerLines.join('\n'),
+    4,
+  )}\n  );\n}\n`;
 }
 
 function renderBaseHomePageParagraphs(features: InstalledFeatures): string[] {
@@ -310,6 +343,16 @@ function renderBaseHomePageParagraphs(features: InstalledFeatures): string[] {
     );
   }
 
+  if (features.apollo) {
+    paragraphs.push(
+      `        <p>
+          Apollo scaffolding is ready for this project, including a shared
+          GraphQL client, route-level provider wiring, and a live example query
+          route.
+        </p>`,
+    );
+  }
+
   return paragraphs;
 }
 
@@ -340,6 +383,14 @@ function renderBaseHomePageLinks(features: InstalledFeatures): string[] {
     );
   }
 
+  if (features.apollo) {
+    links.push(
+      `        <p>
+          <Link to="/apollo">Open the Apollo example</Link>
+        </p>`,
+    );
+  }
+
   return links;
 }
 
@@ -351,7 +402,7 @@ function renderBaseHomePage(
     'import { env } from \'@/shared/config\';',
   ];
 
-  if (features.auth || features.redux || features.reactQuery) {
+  if (features.auth || features.redux || features.reactQuery || features.apollo) {
     contentLines.unshift("import { Link } from 'react-router-dom';");
   }
 
@@ -395,8 +446,17 @@ function renderUiLibraryDescriptionParagraphs(
   if (features.reactQuery) {
     paragraphs.push(
       `            <Typography color="text.secondary" maxWidth={720}>
-              React Query scaffolding adds a shared QueryClient, devtools, and
-              Axios-based wrappers for feature-level data hooks.
+          React Query scaffolding adds a shared QueryClient, devtools, and
+          Axios-based wrappers for feature-level data hooks.
+        </Typography>`,
+    );
+  }
+
+  if (features.apollo) {
+    paragraphs.push(
+      `            <Typography color="text.secondary" maxWidth={720}>
+              Apollo scaffolding adds a route-level GraphQL provider, a shared
+              client setup, and a live <code>__typename</code> example route.
             </Typography>`,
     );
   }
@@ -428,6 +488,13 @@ function buildHomePageButtons(features: InstalledFeatures): string[] {
     });
   }
 
+  if (features.apollo) {
+    buttons.push({
+      label: 'Open the Apollo example',
+      to: '/apollo',
+    });
+  }
+
   return buttons.map(({ label, to }, index) => {
     const variant = index === 0 ? 'contained' : 'outlined';
 
@@ -443,7 +510,7 @@ function renderUiLibraryHomePage(
 ): string {
   const imports = ['import { Chip, Container, Stack, Typography } from \'@mui/material\';'];
 
-  if (features.auth || features.redux || features.reactQuery) {
+  if (features.auth || features.redux || features.reactQuery || features.apollo) {
     imports[0] =
       "import { Button, Chip, Container, Stack, Typography } from '@mui/material';";
     imports.push("import { Link as RouterLink } from 'react-router-dom';");
@@ -520,6 +587,14 @@ function renderHomePageTest(
       `    expect(
       screen.getByRole('link', { name: /Open the React Query example/i }),
     ).toHaveAttribute('href', '/react-query');`,
+    );
+  }
+
+  if (features.apollo) {
+    assertions.push(
+      `    expect(
+      screen.getByRole('link', { name: /Open the Apollo example/i }),
+    ).toHaveAttribute('href', '/apollo');`,
     );
   }
 

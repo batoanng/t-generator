@@ -2,7 +2,7 @@
 
 `t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
 
-The current implementation covers the base React + TypeScript + Vite scaffold plus five add-on features: `bff`, `ui-library`, `auth`, `redux`, and `react-query`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, client-state, and async-data wiring only when they need it.
+The current implementation covers the base React + TypeScript + Vite scaffold plus six add-on features: `bff`, `ui-library`, `auth`, `redux`, `react-query`, and `apollo`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, client-state, REST data, and GraphQL wiring only when they need it.
 
 The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
 
@@ -19,6 +19,7 @@ yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
+yo t-generator:add apollo
 ```
 
 ## What the generator creates today
@@ -43,8 +44,9 @@ The base command does not install add-on features automatically. The implemented
 - `auth`, which wires the Auth0 React SDK into the app shell, adds an `/auth` example page, and links to it from the home page
 - `redux`, which wires a persisted Redux Toolkit store into the app shell, adds a `/redux` example page, and links to it from the home page
 - `react-query`, which wires a shared QueryClient and Axios-based data helpers into the app shell, adds a `/react-query` example page, and links to it from the home page
+- `apollo`, which wires a shared Apollo client into the routed app tree, adds a generated GraphQL demo hook, and links to an `/apollo` example page from the home page
 
-The remaining planned features are still pending: Apollo, notifications, and PWA support.
+The remaining planned features are still pending: notifications and PWA support.
 
 ## UI direction
 
@@ -97,6 +99,21 @@ When you add it, the generator:
 - adds a main-page link to open the React Query example
 
 `react-query` works as a standalone feature and also composes with `auth`, `redux`, and `ui-library` in either order.
+
+## Apollo flow
+
+The `apollo` feature uses `@apollo/client` and `graphql`.
+
+When you add it, the generator:
+
+- extends `.env.example` with `VITE_GRAPHQL_URL=/graphql`
+- adds `env.graphqlUrl` to the shared env helper
+- creates `src/shared/apollo` with a route-level Apollo provider and client setup
+- generates a small `query ApolloDemoRootType { __typename }` demo hook under `src/features/apollo-demo`
+- creates a public `/apollo` page that explains the setup and runs the demo query
+- adds a main-page link to open the Apollo example
+
+`apollo` works as a standalone feature and also composes with `auth`, `redux`, `react-query`, and `ui-library` in either order. When `auth` is present, the generated Apollo provider attempts to attach an Auth0 access token and falls back to unauthenticated requests until Auth0 is configured.
 
 ## Base app architecture
 
@@ -211,6 +228,7 @@ The interactive prompt currently lets you choose between, in order:
 - `auth`
 - `redux`
 - `react-query`
+- `apollo`
 
 If you prefer the explicit form, these still work:
 
@@ -220,6 +238,7 @@ yo t-generator:add ui-library
 yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
+yo t-generator:add apollo
 ```
 
 After the BFF files are generated:
@@ -264,7 +283,16 @@ npm run dev
 
 Then open `/react-query`.
 
-All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, and `react-query` also validate that the shared managed app shell still matches the expected composed scaffold before they rewrite providers, routes, env helpers, and home-page content.
+After the Apollo files are generated:
+
+```bash
+npm install
+npm run dev
+```
+
+Then open `/apollo`.
+
+All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, `react-query`, and `apollo` also validate that the shared managed app shell still matches the expected composed scaffold before they rewrite providers, routes, env helpers, and home-page content.
 
 ## Local development
 
@@ -345,8 +373,8 @@ The current test suite covers:
 - adding the `auth` feature to an existing generated base app
 - adding the `redux` feature to an existing generated base app
 - adding the `react-query` feature to an existing generated base app
-- composing `ui-library` and `auth` in either order
-- composing `redux` and `react-query` with `auth` and `ui-library` in either order
+- adding the `apollo` feature to an existing generated base app
+- composing `ui-library`, `auth`, `redux`, `react-query`, and `apollo` in supported orders
 - the generated base project structure and files
 - absence of feature-specific dependencies in the base
 - failure when `bff` is added outside the generated base app
@@ -354,9 +382,11 @@ The current test suite covers:
 - failure when `auth` is added outside the generated base app
 - failure when `redux` is added outside the generated base app
 - failure when `react-query` is added outside the generated base app
+- failure when `apollo` is added outside the generated base app
 - failure when `bff` generation would overwrite existing BFF wiring
 - failure when `ui-library` generation would overwrite existing managed UI wiring
 - failure when `auth` generation would overwrite existing managed auth wiring
 - failure when `redux` generation would overwrite existing managed Redux wiring
 - failure when `react-query` generation would overwrite existing managed React Query wiring
+- failure when `apollo` generation would overwrite existing managed Apollo wiring
 - failure on non-empty target directories

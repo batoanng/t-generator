@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+import { buildApolloManagedFiles } from '../lib/apollo-scaffold';
 import { addManagedFile, hasPackageDependency } from '../lib/helpers';
 import type { FeatureDefinition } from '../lib/types';
 
@@ -58,6 +59,14 @@ const authFeature: FeatureDefinition = {
     }
 
     generator._validateSharedScaffold('Auth', generator.installedFeatures);
+
+    if (generator.installedFeatures.apollo) {
+      generator._validateManagedFiles(
+        'Auth',
+        buildApolloManagedFiles(generator.installedFeatures),
+        'Apollo scaffold',
+      );
+    }
   },
   write(generator) {
     generator._writeDependencies(AUTH_DEPENDENCIES);
@@ -66,6 +75,15 @@ const authFeature: FeatureDefinition = {
       auth: true,
     });
     generator._writeManagedFiles(AUTH_NEW_FILES);
+
+    if (generator.installedFeatures.apollo) {
+      generator._writeManagedFiles(
+        buildApolloManagedFiles({
+          ...generator.installedFeatures,
+          auth: true,
+        }),
+      );
+    }
   },
   end(generator) {
     generator.log('Auth feature scaffolded in "./src/pages/auth".');

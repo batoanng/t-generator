@@ -4,6 +4,7 @@ import path from 'node:path';
 import GeneratorBase from 'yeoman-generator';
 
 import type { PackageJson } from '../lib/types';
+import apolloFeature from './features/apollo';
 import authFeature from './features/auth';
 import bffFeature from './features/bff';
 import reactQueryFeature from './features/react-query';
@@ -39,6 +40,7 @@ const FEATURES = [
   authFeature,
   reduxFeature,
   reactQueryFeature,
+  apolloFeature,
 ];
 const FEATURE_BY_NAME = new Map(
   FEATURES.map((featureDefinition) => [
@@ -191,6 +193,7 @@ export = class AddGenerator extends GeneratorBase {
       uiLibrary: uiLibraryFeature.isInstalled?.(this) ?? false,
       redux: reduxFeature.isInstalled?.(this) ?? false,
       reactQuery: reactQueryFeature.isInstalled?.(this) ?? false,
+      apollo: apolloFeature.isInstalled?.(this) ?? false,
     };
   }
 
