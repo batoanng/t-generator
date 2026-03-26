@@ -25,7 +25,7 @@ module.exports = tseslint.config(
     files: ['generators/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: './tsconfig.json',
+        projectService: true,
         tsconfigRootDir: __dirname,
       },
       globals: nodeGlobals,

@@ -29,19 +29,23 @@ const AUTH_MANAGED_DIRECTORIES = [
   'src/pages/auth',
 ] as const;
 
+function isAuthInstalled(generator: Parameters<FeatureDefinition['validate']>[0]): boolean {
+  return (
+    hasPackageDependency(generator.rootPackageJson, '@auth0/auth0-react') ||
+    AUTH_MANAGED_DIRECTORIES.some((directoryPath) =>
+      fs.existsSync(generator.destinationPath(directoryPath)),
+    )
+  );
+}
+
 const authFeature: FeatureDefinition = {
   name: 'auth',
   label: 'Auth',
   isInstalled(generator) {
-    return (
-      hasPackageDependency(generator.rootPackageJson, '@auth0/auth0-react') ||
-      AUTH_MANAGED_DIRECTORIES.some((directoryPath) =>
-        fs.existsSync(generator.destinationPath(directoryPath)),
-      )
-    );
+    return isAuthInstalled(generator);
   },
   validate(generator) {
-    if (this.isInstalled?.(generator)) {
+    if (isAuthInstalled(generator)) {
       throw new Error(
         'Auth generation aborted because package.json already defines "@auth0/auth0-react".',
       );

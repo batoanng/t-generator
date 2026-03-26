@@ -53,6 +53,43 @@ const FEATURE_BY_NAME = new Map(
 const SUPPORTED_FEATURES = FEATURES.map(
   (featureDefinition) => featureDefinition.name,
 );
+const FEATURE_PROMPT_CHOICES = [
+  {
+    name: 'Backend for Frontend (BFF)',
+    value: 'bff',
+    hint: 'Adds an Express-based server/ proxy layer for local API integration.',
+  },
+  {
+    name: 'UI library and theme wiring',
+    value: 'ui-library',
+    hint: 'Installs MUI and shared UI components, then wires the app theme.',
+  },
+  {
+    name: 'Authentication (Auth0)',
+    value: 'auth',
+    hint: 'Adds Auth0 provider setup and a generated auth example page.',
+  },
+  {
+    name: 'Redux state management',
+    value: 'redux',
+    hint: 'Adds a Redux Toolkit store, persistence, and a demo route.',
+  },
+  {
+    name: 'React Query data fetching',
+    value: 'react-query',
+    hint: 'Adds TanStack Query, Axios helpers, and a generated example page.',
+  },
+  {
+    name: 'Apollo GraphQL client',
+    value: 'apollo',
+    hint: 'Adds Apollo client/provider wiring and a GraphQL demo route.',
+  },
+  {
+    name: 'Progressive Web App (PWA)',
+    value: 'pwa',
+    hint: 'Adds offline support, install prompts, and service worker setup.',
+  },
+] as const;
 
 function getFeatureLabel(featureName: string): string {
   return FEATURE_BY_NAME.get(featureName)?.label || `Feature "${featureName}"`;
@@ -101,10 +138,10 @@ export = class AddGenerator extends GeneratorBase {
 
     const answers = await this.prompt<FeaturePromptAnswers>([
       {
-        type: 'list',
+        type: 'select',
         name: 'featureName',
         message: 'Feature to add',
-        choices: SUPPORTED_FEATURES,
+        choices: FEATURE_PROMPT_CHOICES,
       },
     ]);
 

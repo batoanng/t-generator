@@ -24,7 +24,7 @@ const UI_LIBRARY_NEW_FILES = [
 ];
 
 const UI_LIBRARY_DEPENDENCIES = {
-  '@batoanng/mui-components': '^3.0.30',
+  '@batoanng/mui-components': '^3.1.0',
   '@emotion/react': '^11.13.5',
   '@emotion/styled': '^11.13.5',
   '@mui/icons-material': '6.1.8',
@@ -40,20 +40,24 @@ const UI_LIBRARY_DEPENDENCIES = {
 
 const UI_LIBRARY_MANAGED_DIRECTORY = 'src/widgets/ui-library-showcase';
 
+function isUiLibraryInstalled(generator: Parameters<FeatureDefinition['validate']>[0]): boolean {
+  return (
+    hasPackageDependency(
+      generator.rootPackageJson,
+      '@batoanng/mui-components',
+    ) ||
+    fs.existsSync(generator.destinationPath(UI_LIBRARY_MANAGED_DIRECTORY))
+  );
+}
+
 const uiLibraryFeature: FeatureDefinition = {
   name: 'ui-library',
   label: 'UI library',
   isInstalled(generator) {
-    return (
-      hasPackageDependency(
-        generator.rootPackageJson,
-        '@batoanng/mui-components',
-      ) ||
-      fs.existsSync(generator.destinationPath(UI_LIBRARY_MANAGED_DIRECTORY))
-    );
+    return isUiLibraryInstalled(generator);
   },
   validate(generator) {
-    if (this.isInstalled?.(generator)) {
+    if (isUiLibraryInstalled(generator)) {
       throw new Error(
         'UI library generation aborted because package.json already defines "@batoanng/mui-components".',
       );
