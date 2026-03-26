@@ -37,6 +37,7 @@ distSmokeTest(
         'generators/add/templates/apollo/src/shared/apollo/ApolloWithAuthProvider.tsx.ejs',
       ),
       path.join(distRoot, 'generators/add/templates/bff/server/server.js.ejs'),
+      path.join(distRoot, 'generators/add/templates/pwa/vite.config.ts.ejs'),
       path.join(distRoot, 'generators/add/templates/redux/src/app/store/index.ts.ejs'),
       path.join(
         distRoot,
@@ -63,12 +64,12 @@ distSmokeTest(
 
     await runResult
       .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
-      .withArguments(['apollo'])
+      .withArguments(['pwa'])
       .run();
 
     yoAssert.file([
-      path.join(projectRoot, 'src/shared/apollo/index.ts'),
-      path.join(projectRoot, 'src/pages/apollo/index.ts'),
+      path.join(projectRoot, 'src/features/pwa/index.ts'),
+      path.join(projectRoot, 'src/pages/pwa/index.ts'),
     ]);
   },
 );

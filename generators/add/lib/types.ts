@@ -10,6 +10,7 @@ export interface InstalledFeatures {
   redux: boolean;
   reactQuery: boolean;
   apollo: boolean;
+  pwa: boolean;
 }
 
 export interface AddGeneratorContext {

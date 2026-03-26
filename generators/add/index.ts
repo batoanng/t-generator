@@ -7,6 +7,7 @@ import type { PackageJson } from '../lib/types';
 import apolloFeature from './features/apollo';
 import authFeature from './features/auth';
 import bffFeature from './features/bff';
+import pwaFeature from './features/pwa';
 import reactQueryFeature from './features/react-query';
 import reduxFeature from './features/redux';
 import uiLibraryFeature from './features/ui-library';
@@ -41,6 +42,7 @@ const FEATURES = [
   reduxFeature,
   reactQueryFeature,
   apolloFeature,
+  pwaFeature,
 ];
 const FEATURE_BY_NAME = new Map(
   FEATURES.map((featureDefinition) => [
@@ -194,6 +196,7 @@ export = class AddGenerator extends GeneratorBase {
       redux: reduxFeature.isInstalled?.(this) ?? false,
       reactQuery: reactQueryFeature.isInstalled?.(this) ?? false,
       apollo: apolloFeature.isInstalled?.(this) ?? false,
+      pwa: pwaFeature.isInstalled?.(this) ?? false,
     };
   }
 

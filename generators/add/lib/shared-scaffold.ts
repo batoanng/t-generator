@@ -269,6 +269,10 @@ function renderAppRouter(features: InstalledFeatures): string {
     imports.push("import { ApolloWithAuthProvider } from '@/shared/apollo';");
   }
 
+  if (features.pwa) {
+    imports.push("import { PwaPage } from '@/pages/pwa';");
+  }
+
   const routeLines = ['<Route path="/" element={<HomePage />} />'];
 
   if (features.auth) {
@@ -287,6 +291,10 @@ function renderAppRouter(features: InstalledFeatures): string {
 
   if (features.apollo) {
     routeLines.push('<Route path="/apollo" element={<ApolloPage />} />');
+  }
+
+  if (features.pwa) {
+    routeLines.push('<Route path="/pwa" element={<PwaPage />} />');
   }
 
   routeLines.push('<Route path="*" element={<Navigate replace to="/" />} />');
@@ -353,6 +361,16 @@ function renderBaseHomePageParagraphs(features: InstalledFeatures): string[] {
     );
   }
 
+  if (features.pwa) {
+    paragraphs.push(
+      `        <p>
+          PWA scaffolding is ready for this project, including plugin-managed
+          manifest generation, install and update prompts, and a dedicated guide
+          route.
+        </p>`,
+    );
+  }
+
   return paragraphs;
 }
 
@@ -391,6 +409,14 @@ function renderBaseHomePageLinks(features: InstalledFeatures): string[] {
     );
   }
 
+  if (features.pwa) {
+    links.push(
+      `        <p>
+          <Link to="/pwa">Open the PWA example</Link>
+        </p>`,
+    );
+  }
+
   return links;
 }
 
@@ -402,7 +428,13 @@ function renderBaseHomePage(
     'import { env } from \'@/shared/config\';',
   ];
 
-  if (features.auth || features.redux || features.reactQuery || features.apollo) {
+  if (
+    features.auth ||
+    features.redux ||
+    features.reactQuery ||
+    features.apollo ||
+    features.pwa
+  ) {
     contentLines.unshift("import { Link } from 'react-router-dom';");
   }
 
@@ -461,6 +493,16 @@ function renderUiLibraryDescriptionParagraphs(
     );
   }
 
+  if (features.pwa) {
+    paragraphs.push(
+      `            <Typography color="text.secondary" maxWidth={720}>
+              PWA scaffolding adds install and update status UI, plugin-managed
+              manifest generation, and a dedicated guide route for offline
+              behavior.
+            </Typography>`,
+    );
+  }
+
   return paragraphs;
 }
 
@@ -495,6 +537,13 @@ function buildHomePageButtons(features: InstalledFeatures): string[] {
     });
   }
 
+  if (features.pwa) {
+    buttons.push({
+      label: 'Open the PWA example',
+      to: '/pwa',
+    });
+  }
+
   return buttons.map(({ label, to }, index) => {
     const variant = index === 0 ? 'contained' : 'outlined';
 
@@ -510,7 +559,13 @@ function renderUiLibraryHomePage(
 ): string {
   const imports = ['import { Chip, Container, Stack, Typography } from \'@mui/material\';'];
 
-  if (features.auth || features.redux || features.reactQuery || features.apollo) {
+  if (
+    features.auth ||
+    features.redux ||
+    features.reactQuery ||
+    features.apollo ||
+    features.pwa
+  ) {
     imports[0] =
       "import { Button, Chip, Container, Stack, Typography } from '@mui/material';";
     imports.push("import { Link as RouterLink } from 'react-router-dom';");
@@ -595,6 +650,14 @@ function renderHomePageTest(
       `    expect(
       screen.getByRole('link', { name: /Open the Apollo example/i }),
     ).toHaveAttribute('href', '/apollo');`,
+    );
+  }
+
+  if (features.pwa) {
+    assertions.push(
+      `    expect(
+      screen.getByRole('link', { name: /Open the PWA example/i }),
+    ).toHaveAttribute('href', '/pwa');`,
     );
   }
 

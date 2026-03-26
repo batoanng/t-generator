@@ -169,6 +169,7 @@ yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
 yo t-generator:add apollo
+yo t-generator:add pwa
 ```
 
 Responsibilities:
@@ -187,6 +188,7 @@ Prompt order for the current implementation:
 4. `redux`
 5. `react-query`
 6. `apollo`
+7. `pwa`
 
 ### 7.3 Test command
 
@@ -487,9 +489,24 @@ Purpose:
 
 Responsibilities:
 
-- configure service worker support
-- add install/update hooks or components
-- configure manifest and required assets scaffolding
+- install `vite-plugin-pwa`
+- rewrite `vite.config.ts` to use `VitePWA` with `strategies: 'generateSW'`
+- use prompt-based service worker updates through `registerType: 'prompt'`
+- enable development-mode service worker support for local testing
+- generate manifest defaults from the app display name
+- generate PWA assets from a single `public/pwa-icon.svg` source through the plugin
+- rewrite `src/app/entrypoint/App.tsx` to mount app-shell PWA status UI
+- generate `src/features/pwa` with a React wrapper around `virtual:pwa-register/react`
+- support install prompts, update prompts, and online/offline state
+- add a generated `/pwa` guide page
+- add a main-page link to open the PWA example
+- validate existing managed files before writing PWA changes
+
+Notes:
+
+- The first implementation should stay on the plugin-managed `generateSW` path and should not generate a custom `src/sw.ts`.
+- The feature should work on the base app and also compose with `auth`, `redux`, `react-query`, `apollo`, and `ui-library` in either order.
+- The first version should keep runtime caching conservative and avoid schema-specific or API-specific runtime caching rules.
 
 ---
 
@@ -515,6 +532,8 @@ Feature generators should compose cleanly.
 - `redux` must compose cleanly with both `auth` and `ui-library`
 - `react-query` must compose cleanly with `auth`, `redux`, and `ui-library`
 - `apollo` must compose cleanly with `auth`, `redux`, `react-query`, and `ui-library`
+- `pwa` must compose cleanly with `auth`, `redux`, `react-query`, `apollo`, and `ui-library`
+- `pwa` should not disrupt `bff` scripts or server scaffolding
 - `notifications` may extend the provider tree created by `ui-library`
 - `bff` may add scripts without disrupting existing frontend scripts
 
@@ -542,6 +561,7 @@ Examples:
 - `auth`: provider and `/auth` page smoke test
 - `react-query`: query client and `/react-query` page smoke test
 - `apollo`: provider and `/apollo` page smoke test
+- `pwa`: app-shell status wiring, `vite-plugin-pwa` config, and `/pwa` page smoke test
 - `redux`: store or slice smoke test
 - `bff`: server boot or config smoke test where practical
 
@@ -598,5 +618,6 @@ The first implementation pass should prioritize:
 5. redux
 6. react-query
 7. apollo
+8. pwa
 
 The remaining features can follow after the core generation flow is stable.

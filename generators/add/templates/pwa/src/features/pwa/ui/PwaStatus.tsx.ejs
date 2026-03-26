@@ -1,0 +1,89 @@
+import { usePwaState } from '../model';
+import './pwa-status.css';
+
+export function PwaStatus() {
+  const {
+    canInstall,
+    dismissOfflineReady,
+    dismissUpdatePrompt,
+    installApp,
+    isOfflineReady,
+    isOnline,
+    isUpdateAvailable,
+    updateApp,
+  } = usePwaState();
+
+  if (!canInstall && !isOfflineReady && isOnline && !isUpdateAvailable) {
+    return null;
+  }
+
+  return (
+    <aside className="pwa-status" aria-live="polite">
+      {isUpdateAvailable ? (
+        <section className="pwa-banner pwa-banner--update">
+          <div>
+            <p className="pwa-banner__eyebrow">Update ready</p>
+            <p className="pwa-banner__title">A new version is available.</p>
+            <p className="pwa-banner__body">
+              Reload when you are ready to activate the waiting service worker.
+            </p>
+          </div>
+          <div className="pwa-actions">
+            <button className="pwa-button pwa-button--primary" onClick={() => void updateApp()} type="button">
+              Reload app
+            </button>
+            <button className="pwa-button" onClick={dismissUpdatePrompt} type="button">
+              Later
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {isOfflineReady ? (
+        <section className="pwa-banner pwa-banner--ready">
+          <div>
+            <p className="pwa-banner__eyebrow">Offline ready</p>
+            <p className="pwa-banner__title">
+              The app shell is cached for offline use.
+            </p>
+          </div>
+          <div className="pwa-actions">
+            <button className="pwa-button" onClick={dismissOfflineReady} type="button">
+              Dismiss
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {!isOnline ? (
+        <section className="pwa-banner pwa-banner--offline">
+          <div>
+            <p className="pwa-banner__eyebrow">Offline</p>
+            <p className="pwa-banner__title">
+              Network access is currently unavailable.
+            </p>
+            <p className="pwa-banner__body">
+              Cached assets can still keep the generated shell available.
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      {canInstall ? (
+        <section className="pwa-banner pwa-banner--install">
+          <div>
+            <p className="pwa-banner__eyebrow">Installable</p>
+            <p className="pwa-banner__title">
+              This app can be installed on the current device.
+            </p>
+          </div>
+          <div className="pwa-actions">
+            <button className="pwa-button pwa-button--primary" onClick={() => void installApp()} type="button">
+              Install app
+            </button>
+          </div>
+        </section>
+      ) : null}
+    </aside>
+  );
+}

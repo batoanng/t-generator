@@ -1,0 +1,46 @@
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      strategies: 'generateSW',
+      registerType: 'prompt',
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
+      pwaAssets: {
+        preset: 'minimal-2023',
+        image: 'public/pwa-icon.svg',
+        includeHtmlHeadLinks: true,
+        overrideManifestIcons: true,
+        injectThemeColor: true,
+        htmlPreset: '2023',
+      },
+      manifest: {
+        name: '<%= appDisplayName %>',
+        short_name: '<%= appDisplayName %>',
+        description: '<%= appDisplayName %> progressive web application with offline-ready app shell support.',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        scope: '/',
+        start_url: '/',
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+      },
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+});

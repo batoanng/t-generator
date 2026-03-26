@@ -1,0 +1,140 @@
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+}
+
+interface PwaState {
+  canInstall: boolean;
+  dismissOfflineReady(): void;
+  dismissUpdatePrompt(): void;
+  installApp(): Promise<void>;
+  isInstalled: boolean;
+  isOfflineReady: boolean;
+  isOnline: boolean;
+  isUpdateAvailable: boolean;
+  updateApp(): Promise<void>;
+}
+
+const PwaStateContext = createContext<PwaState | null>(null);
+
+function isRunningStandalone(): boolean {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.matchMedia !== 'function'
+  ) {
+    return false;
+  }
+
+  return window.matchMedia('(display-mode: standalone)').matches;
+}
+
+export function PwaProvider({ children }: PropsWithChildren) {
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  );
+  const {
+    offlineReady: [isOfflineReady, setOfflineReady],
+    needRefresh: [isUpdateAvailable, setUpdateAvailable],
+    updateServiceWorker,
+  } = useRegisterSW({
+    immediate: true,
+    onRegisterError(error) {
+      console.error('PWA registration failed.', error);
+    },
+  });
+
+  useEffect(() => {
+    setIsInstalled(isRunningStandalone());
+
+    const handleOnline = () => {
+      setIsOnline(true);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  async function installApp(): Promise<void> {
+    if (!installPrompt) {
+      return;
+    }
+
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  }
+
+  async function updateApp(): Promise<void> {
+    await updateServiceWorker();
+  }
+
+  return (
+    <PwaStateContext.Provider
+      value={{
+        canInstall: !isInstalled && installPrompt !== null,
+        dismissOfflineReady() {
+          setOfflineReady(false);
+        },
+        dismissUpdatePrompt() {
+          setUpdateAvailable(false);
+        },
+        installApp,
+        isInstalled,
+        isOfflineReady,
+        isOnline,
+        isUpdateAvailable,
+        updateApp,
+      }}
+    >
+      {children}
+    </PwaStateContext.Provider>
+  );
+}
+
+export function usePwaState(): PwaState {
+  const value = useContext(PwaStateContext);
+
+  if (!value) {
+    throw new Error('usePwaState must be used inside PwaProvider.');
+  }
+
+  return value;
+}

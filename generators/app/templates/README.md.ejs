@@ -21,6 +21,7 @@ The interactive flow currently offers, in order:
 - `redux`
 - `react-query`
 - `apollo`
+- `pwa`
 
 You can also call a feature directly when needed:
 
@@ -31,6 +32,7 @@ yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
 yo t-generator:add apollo
+yo t-generator:add pwa
 ```
 
 ## UI
@@ -63,6 +65,13 @@ The `apollo` feature adds a route-level Apollo provider, a shared GraphQL
 client setup under `src/shared/apollo`, a generated `__typename` example query
 hook under `src/features/apollo-demo`, and a generated `/apollo` example route
 linked from the home screen.
+
+## PWA
+
+The `pwa` feature adds `vite-plugin-pwa` build wiring, a generated
+`src/features/pwa` runtime for install and update state, a global `PwaStatus`
+app-shell component, and a generated `/pwa` guide route linked from the home
+screen.
 
 ## Scripts
 

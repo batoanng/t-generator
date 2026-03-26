@@ -1,0 +1,147 @@
+import { Link } from 'react-router-dom';
+import { usePwaState } from '@/features/pwa';
+
+const generatedFiles = [
+  'vite.config.ts',
+  'src/app/entrypoint/App.tsx',
+  'src/features/pwa/model/PwaProvider.tsx',
+  'src/features/pwa/ui/PwaStatus.tsx',
+  'src/pages/pwa/ui/PwaPage.tsx',
+  'public/pwa-icon.svg',
+];
+
+export function PwaPage() {
+  const {
+    canInstall,
+    installApp,
+    isInstalled,
+    isOfflineReady,
+    isOnline,
+    isUpdateAvailable,
+    updateApp,
+  } = usePwaState();
+
+  return (
+    <main className="pwa-page">
+      <section className="pwa-page__card">
+        <div>
+          <p className="eyebrow">PWA example</p>
+          <h1>Offline-ready app shell and install prompts are wired in</h1>
+          <p>
+            This route documents the generated <code>vite-plugin-pwa</code>{' '}
+            setup. The app shell mounts <code>PwaStatus</code> globally, while this
+            page exposes the same install, update, and connectivity state in a
+            route-level guide.
+          </p>
+          <p>
+            The generated Vite config uses <code>generateSW</code>, prompt-based
+            updates, plugin-managed manifest output, and asset generation from a
+            single source SVG at <code>public/pwa-icon.svg</code>.
+          </p>
+        </div>
+
+        <div className="pwa-page__grid">
+          <section className="pwa-page__panel">
+            <h2>Live state</h2>
+            <ul className="pwa-page__status-list">
+              <li>
+                Browser connectivity:{' '}
+                <span className="pwa-page__status-value">
+                  {isOnline ? 'online' : 'offline'}
+                </span>
+              </li>
+              <li>
+                Cached for offline use:{' '}
+                <span className="pwa-page__status-value">
+                  {isOfflineReady ? 'ready' : 'waiting'}
+                </span>
+              </li>
+              <li>
+                Update waiting:{' '}
+                <span className="pwa-page__status-value">
+                  {isUpdateAvailable ? 'yes' : 'no'}
+                </span>
+              </li>
+              <li>
+                Install prompt available:{' '}
+                <span className="pwa-page__status-value">
+                  {canInstall ? 'yes' : 'no'}
+                </span>
+              </li>
+              <li>
+                Running standalone:{' '}
+                <span className="pwa-page__status-value">
+                  {isInstalled ? 'yes' : 'no'}
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <section className="pwa-page__panel">
+            <h2>Actions</h2>
+            <p>
+              Install prompts only appear when the browser decides the app is
+              installable. Update prompts appear when a new service worker is
+              waiting and require a reload action to activate it.
+            </p>
+            <div className="pwa-page__actions">
+              <button
+                className="pwa-button pwa-button--primary"
+                disabled={!canInstall}
+                onClick={() => void installApp()}
+                type="button"
+              >
+                Install app
+              </button>
+              <button
+                className="pwa-button"
+                disabled={!isUpdateAvailable}
+                onClick={() => void updateApp()}
+                type="button"
+              >
+                Reload for update
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <section className="pwa-page__panel">
+          <h2>Generated build setup</h2>
+          <code className="pwa-page__code">
+            {`VitePWA({
+  strategies: 'generateSW',
+  registerType: 'prompt',
+  pwaAssets: { preset: 'minimal-2023', image: 'public/pwa-icon.svg' },
+  manifest: { name: '<%= appDisplayName %>', start_url: '/', display: 'standalone' },
+  workbox: { cleanupOutdatedCaches: true, clientsClaim: true }
+})`}
+          </code>
+          <p>
+            Runtime caching stays conservative in v1. The generated service
+            worker precaches the built app shell and static assets, but it does
+            not add custom API or GraphQL caching rules.
+          </p>
+        </section>
+
+        <section className="pwa-page__panel">
+          <h2>Files owned by this feature</h2>
+          <ul className="pwa-page__meta">
+            {generatedFiles.map((filePath) => (
+              <li key={filePath}>
+                <code>{filePath}</code>
+              </li>
+            ))}
+          </ul>
+          <p>
+            Replace the generated icon source, manifest copy, and prompt copy
+            with product-specific branding once the base workflow is in place.
+          </p>
+        </section>
+
+        <p className="pwa-page__footer">
+          <Link to="/">Return to the home page</Link>
+        </p>
+      </section>
+    </main>
+  );
+}

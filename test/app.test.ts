@@ -117,6 +117,9 @@ test('generates the base app with the expected project structure', async () => {
   );
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/pages/apollo')), false);
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/shared/apollo')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/pages/pwa')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/features/pwa')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'public/pwa-icon.svg')), false);
 
   yoAssert.fileContent(
     path.join(projectRoot, 'src/shared/config/env.ts'),
@@ -149,6 +152,10 @@ test('generates the base app with the expected project structure', async () => {
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
     'yo t-generator:add apollo',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'README.md'),
+    'yo t-generator:add pwa',
   );
 });
 

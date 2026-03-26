@@ -2,7 +2,7 @@
 
 `t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
 
-The current implementation covers the base React + TypeScript + Vite scaffold plus six add-on features: `bff`, `ui-library`, `auth`, `redux`, `react-query`, and `apollo`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, client-state, REST data, and GraphQL wiring only when they need it.
+The current implementation covers the base React + TypeScript + Vite scaffold plus seven add-on features: `bff`, `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, client-state, REST data, GraphQL wiring, and progressive web app support only when they need it.
 
 The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
 
@@ -20,6 +20,7 @@ yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
 yo t-generator:add apollo
+yo t-generator:add pwa
 ```
 
 ## What the generator creates today
@@ -45,8 +46,9 @@ The base command does not install add-on features automatically. The implemented
 - `redux`, which wires a persisted Redux Toolkit store into the app shell, adds a `/redux` example page, and links to it from the home page
 - `react-query`, which wires a shared QueryClient and Axios-based data helpers into the app shell, adds a `/react-query` example page, and links to it from the home page
 - `apollo`, which wires a shared Apollo client into the routed app tree, adds a generated GraphQL demo hook, and links to an `/apollo` example page from the home page
+- `pwa`, which wires `vite-plugin-pwa` into the build, adds install and update status UI to the app shell, and links to a `/pwa` guide page from the home page
 
-The remaining planned features are still pending: notifications and PWA support.
+The remaining planned feature is notifications.
 
 ## UI direction
 
@@ -114,6 +116,21 @@ When you add it, the generator:
 - adds a main-page link to open the Apollo example
 
 `apollo` works as a standalone feature and also composes with `auth`, `redux`, `react-query`, and `ui-library` in either order. When `auth` is present, the generated Apollo provider attempts to attach an Auth0 access token and falls back to unauthenticated requests until Auth0 is configured.
+
+## PWA flow
+
+The `pwa` feature uses `vite-plugin-pwa`.
+
+When you add it, the generator:
+
+- installs `vite-plugin-pwa` as a dev dependency
+- rewrites `vite.config.ts` to use `VitePWA` with `generateSW`, prompt-based updates, conservative Workbox precaching, and plugin-managed asset generation from `public/pwa-icon.svg`
+- rewrites `src/app/entrypoint/App.tsx` to mount `PwaProvider` and the global `PwaStatus` app-shell component
+- creates `src/features/pwa` with a `useRegisterSW` wrapper plus install, update, and online/offline state handling
+- creates a public `/pwa` page that explains the generated setup and reflects the live PWA state
+- adds a main-page link to open the PWA example
+
+`pwa` works as a standalone feature and also composes with `auth`, `redux`, `react-query`, `apollo`, and `ui-library` in either order. The first version keeps runtime caching conservative and does not add custom REST or GraphQL caching rules.
 
 ## Base app architecture
 
@@ -229,6 +246,7 @@ The interactive prompt currently lets you choose between, in order:
 - `redux`
 - `react-query`
 - `apollo`
+- `pwa`
 
 If you prefer the explicit form, these still work:
 
@@ -239,6 +257,7 @@ yo t-generator:add auth
 yo t-generator:add redux
 yo t-generator:add react-query
 yo t-generator:add apollo
+yo t-generator:add pwa
 ```
 
 After the BFF files are generated:
@@ -292,7 +311,16 @@ npm run dev
 
 Then open `/apollo`.
 
-All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, `react-query`, and `apollo` also validate that the shared managed app shell still matches the expected composed scaffold before they rewrite providers, routes, env helpers, and home-page content.
+After the PWA files are generated:
+
+```bash
+npm install
+npm run dev
+```
+
+Then open `/pwa`.
+
+All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` also validate managed scaffold files before they rewrite providers, routes, env helpers, entrypoint wiring, home-page content, or Vite setup.
 
 ## Local development
 
@@ -374,7 +402,8 @@ The current test suite covers:
 - adding the `redux` feature to an existing generated base app
 - adding the `react-query` feature to an existing generated base app
 - adding the `apollo` feature to an existing generated base app
-- composing `ui-library`, `auth`, `redux`, `react-query`, and `apollo` in supported orders
+- adding the `pwa` feature to an existing generated base app
+- composing `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` in supported orders
 - the generated base project structure and files
 - absence of feature-specific dependencies in the base
 - failure when `bff` is added outside the generated base app
@@ -383,10 +412,12 @@ The current test suite covers:
 - failure when `redux` is added outside the generated base app
 - failure when `react-query` is added outside the generated base app
 - failure when `apollo` is added outside the generated base app
+- failure when `pwa` is added outside the generated base app
 - failure when `bff` generation would overwrite existing BFF wiring
 - failure when `ui-library` generation would overwrite existing managed UI wiring
 - failure when `auth` generation would overwrite existing managed auth wiring
 - failure when `redux` generation would overwrite existing managed Redux wiring
 - failure when `react-query` generation would overwrite existing managed React Query wiring
 - failure when `apollo` generation would overwrite existing managed Apollo wiring
+- failure when `pwa` generation would overwrite existing managed PWA wiring
 - failure on non-empty target directories
