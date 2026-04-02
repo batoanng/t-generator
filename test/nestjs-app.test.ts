@@ -110,6 +110,7 @@ test('generates the NestJS base app with the expected project structure', async 
   ].forEach((dependencyName) => {
     assert.equal(hasPackageDependency(dependencyName), true, `${dependencyName} should exist`);
   });
+  assert.equal(packageJson.dependencies?.zod, '^4.3.6');
 
   blockedDependencies.forEach((dependencyName) => {
     assert.equal(packageJson.dependencies?.[dependencyName], undefined);

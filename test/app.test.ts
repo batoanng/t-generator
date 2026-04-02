@@ -89,6 +89,12 @@ test('generates the React base app with the expected project structure', async (
     'react-router-dom',
     'zod',
   ]);
+  assert.equal(packageJson.dependencies?.react, '^19.2.4');
+  assert.equal(packageJson.dependencies?.['react-dom'], '^19.2.4');
+  assert.equal(packageJson.dependencies?.['react-router-dom'], '^7.14.0');
+  assert.equal(packageJson.dependencies?.zod, '^4.3.6');
+  assert.equal(packageJson.devDependencies?.['@types/react'], '^19.2.14');
+  assert.equal(packageJson.devDependencies?.['@types/react-dom'], '^19.2.3');
 
   blockedDependencies.forEach((dependencyName) => {
     assert.equal(packageJson.dependencies?.[dependencyName], undefined);

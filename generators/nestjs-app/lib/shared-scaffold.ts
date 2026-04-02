@@ -27,7 +27,7 @@ const BASE_DEPENDENCIES: Record<string, string> = {
   'passport-jwt': '^4.0.1',
   'reflect-metadata': '^0.2.2',
   'rxjs': '^7.8.2',
-  'zod': '^3.24.2',
+  'zod': '^4.3.6',
 };
 
 const BASE_DEV_DEPENDENCIES: Record<string, string> = {

@@ -14,7 +14,7 @@ const SHARED_SCAFFOLD_PATHS = [
 type SharedScaffoldPath = (typeof SHARED_SCAFFOLD_PATHS)[number];
 
 export const REACT_SHARED_DEPENDENCIES = {
-  zod: '^3.24.2',
+  zod: '^4.3.6',
 } as const;
 
 function indent(value: string, spaces: number): string {
