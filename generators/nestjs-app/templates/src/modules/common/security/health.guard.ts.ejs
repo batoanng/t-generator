@@ -1,0 +1,15 @@
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+} from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
+
+@Injectable()
+export class HealthGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
+
+    return request.headers.authorization === `Bearer ${process.env.HEALTH_TOKEN}`;
+  }
+}

@@ -1,6 +1,9 @@
 import path from 'node:path';
 
-export const APP_TEMPLATE_ROOT = path.join(__dirname, '../../app/templates');
+export const APP_TEMPLATE_ROOT = path.join(
+  __dirname,
+  '../../react-app/templates',
+);
 export const ADD_TEMPLATE_ROOT = path.join(__dirname, '../templates');
 export const REQUIRED_BASE_SCRIPTS = [
   'dev',

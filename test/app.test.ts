@@ -105,6 +105,12 @@ test('generates the base app with the expected project structure', async () => {
   });
 
   assert.equal(fs.existsSync(path.join(projectRoot, 'server')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'prisma')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src/server.ts')), false);
+  assert.equal(
+    fs.existsSync(path.join(projectRoot, 'src/modules/app.module.ts')),
+    false,
+  );
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/app/store')), false);
   assert.equal(
     fs.existsSync(path.join(projectRoot, 'src/features/auth')),

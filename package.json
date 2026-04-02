@@ -1,7 +1,7 @@
 {
   "name": "generator-t-generator",
   "version": "0.1.0",
-  "description": "Yeoman generator for bootstrapping a base React + TypeScript + Vite app with Feature-Sliced Design foundations.",
+  "description": "Yeoman generators for bootstrapping React apps and lean NestJS servers.",
   "type": "commonjs",
   "main": "generators/app/index.ts",
   "files": [
@@ -12,6 +12,7 @@
     "yeoman-generator",
     "yeoman",
     "react",
+    "nestjs",
     "vite",
     "typescript"
   ],

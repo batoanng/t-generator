@@ -9,6 +9,9 @@ import {
   addGeneratorPath,
   appGeneratorPath,
   createYeomanTestHelpers,
+  nestjsAppGeneratorPath,
+  reactAddGeneratorPath,
+  reactAppGeneratorPath,
   readJson,
 } from './helpers';
 
@@ -29,19 +32,29 @@ distSmokeTest(
       path.join(distRoot, 'README.md'),
       path.join(distRoot, 'package.json'),
       path.join(distRoot, 'generators/app/index.js'),
-      path.join(distRoot, 'generators/app/templates/package.json.ejs'),
       path.join(distRoot, 'generators/add/index.js'),
-      path.join(distRoot, 'generators/add/templates/auth/_env.example.ejs'),
+      path.join(distRoot, 'generators/react-app/index.js'),
+      path.join(distRoot, 'generators/react-app/templates/package.json.ejs'),
+      path.join(distRoot, 'generators/react-add/index.js'),
+      path.join(distRoot, 'generators/react-add/templates/auth/_env.example.ejs'),
+      path.join(distRoot, 'generators/nestjs-app/index.js'),
+      path.join(distRoot, 'generators/nestjs-app/templates/src/server.ts.ejs'),
       path.join(
         distRoot,
-        'generators/add/templates/apollo/src/shared/apollo/ApolloWithAuthProvider.tsx.ejs',
+        'generators/react-add/templates/apollo/src/shared/apollo/ApolloWithAuthProvider.tsx.ejs',
       ),
-      path.join(distRoot, 'generators/add/templates/bff/server/server.js.ejs'),
-      path.join(distRoot, 'generators/add/templates/pwa/vite.config.ts.ejs'),
-      path.join(distRoot, 'generators/add/templates/redux/src/app/store/index.ts.ejs'),
       path.join(
         distRoot,
-        'generators/add/templates/react-query/src/shared/api/useApiQuery.ts.ejs',
+        'generators/react-add/templates/bff/server/server.js.ejs',
+      ),
+      path.join(distRoot, 'generators/react-add/templates/pwa/vite.config.ts.ejs'),
+      path.join(
+        distRoot,
+        'generators/react-add/templates/redux/src/app/store/index.ts.ejs',
+      ),
+      path.join(
+        distRoot,
+        'generators/react-add/templates/react-query/src/shared/api/useApiQuery.ts.ejs',
       ),
     ]);
 
@@ -70,6 +83,47 @@ distSmokeTest(
     yoAssert.file([
       path.join(projectRoot, 'src/features/pwa/index.ts'),
       path.join(projectRoot, 'src/pages/pwa/index.ts'),
+    ]);
+
+    let reactTmpDir = '';
+    const reactRunResult = await helpers
+      .run(reactAppGeneratorPath)
+      .inTmpDir((directory) => {
+        reactTmpDir = directory;
+      })
+      .withArguments(['explicit-react']);
+
+    const explicitReactRoot = path.join(reactTmpDir, 'explicit-react');
+
+    await reactRunResult
+      .create(
+        reactAddGeneratorPath,
+        { cwd: explicitReactRoot, tmpdir: false },
+        undefined,
+      )
+      .withArguments(['auth'])
+      .run();
+
+    yoAssert.file([
+      path.join(explicitReactRoot, 'src/pages/auth/index.ts'),
+      path.join(
+        explicitReactRoot,
+        'src/app/providers/auth/Auth0ProviderWithNavigate.tsx',
+      ),
+    ]);
+
+    let nestTmpDir = '';
+    await helpers
+      .run(nestjsAppGeneratorPath)
+      .inTmpDir((directory) => {
+        nestTmpDir = directory;
+      })
+      .withArguments(['dist-nest']);
+
+    yoAssert.file([
+      path.join(nestTmpDir, 'dist-nest/package.json'),
+      path.join(nestTmpDir, 'dist-nest/src/server.ts'),
+      path.join(nestTmpDir, 'dist-nest/prisma/schema.prisma'),
     ]);
   },
 );

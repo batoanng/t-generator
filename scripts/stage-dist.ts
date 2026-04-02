@@ -31,12 +31,16 @@ fs.writeFileSync(
 );
 
 copyDirectory(
-  path.join(projectRoot, 'generators', 'app', 'templates'),
-  path.join(distRoot, 'generators', 'app', 'templates'),
+  path.join(projectRoot, 'generators', 'react-app', 'templates'),
+  path.join(distRoot, 'generators', 'react-app', 'templates'),
 );
 copyDirectory(
-  path.join(projectRoot, 'generators', 'add', 'templates'),
-  path.join(distRoot, 'generators', 'add', 'templates'),
+  path.join(projectRoot, 'generators', 'react-add', 'templates'),
+  path.join(distRoot, 'generators', 'react-add', 'templates'),
+);
+copyDirectory(
+  path.join(projectRoot, 'generators', 'nestjs-app', 'templates'),
+  path.join(distRoot, 'generators', 'nestjs-app', 'templates'),
 );
 
 function copyDirectory(sourcePath: string, destinationPath: string): void {

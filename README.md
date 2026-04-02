@@ -1,16 +1,41 @@
 # t-generator
 
-`t-generator` is a Yeoman generator for bootstrapping React repositories with a clean, scalable starting point and then layering feature generators onto that base.
+`t-generator` is a Yeoman generator package for bootstrapping React repositories and lean NestJS servers with clean, scalable starting points.
 
-The current implementation covers the base React + TypeScript + Vite scaffold plus seven add-on features: `bff`, `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa`. The base stays intentionally feature-neutral so projects can opt into backend, UI, authentication, client-state, REST data, GraphQL wiring, and progressive web app support only when they need it.
+The current implementation covers:
 
-The long-term direction is described in [SPECS.md](./SPECS.md). The first implemented command is:
+- a base React + TypeScript + Vite scaffold
+- seven React add-on features: `bff`, `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa`
+- a separate lean NestJS + Fastify + Prisma server base scaffold
+
+The long-term direction is described in [SPECS.md](./SPECS.md).
+
+Primary React base command:
+
+```bash
+yo t-generator:react-app [appName]
+```
+
+Legacy React alias:
 
 ```bash
 yo t-generator [appName]
 ```
 
-The current feature commands are:
+Primary React feature commands:
+
+```bash
+yo t-generator:react-add
+yo t-generator:react-add bff
+yo t-generator:react-add ui-library
+yo t-generator:react-add auth
+yo t-generator:react-add redux
+yo t-generator:react-add react-query
+yo t-generator:react-add apollo
+yo t-generator:react-add pwa
+```
+
+Legacy React feature aliases:
 
 ```bash
 yo t-generator:add
@@ -23,9 +48,17 @@ yo t-generator:add apollo
 yo t-generator:add pwa
 ```
 
-## What the generator creates today
+NestJS base command:
 
-The base app command currently includes:
+```bash
+yo t-generator:nestjs-app [appName]
+```
+
+## What the generators create today
+
+### React base
+
+The React base command currently includes:
 
 - React + TypeScript via Vite
 - ESLint configuration
@@ -38,7 +71,7 @@ The base app command currently includes:
 - Vitest + Testing Library setup
 - a Feature-Sliced Design directory structure
 
-The base command does not install add-on features automatically. The implemented add-ons are:
+The React base command does not install add-on features automatically. The implemented React add-ons are:
 
 - `bff`, which creates a top-level `server/` package for API proxying and production frontend serving
 - `ui-library`, which owns the generated MUI theme wiring, integrates `@batoanng/mui-components`, and adds a showcase section to the home page
@@ -48,7 +81,19 @@ The base command does not install add-on features automatically. The implemented
 - `apollo`, which wires a shared Apollo client into the routed app tree, adds a generated GraphQL demo hook, and links to an `/apollo` example page from the home page
 - `pwa`, which wires `vite-plugin-pwa` into the build, adds install and update status UI to the app shell, and links to a `/pwa` guide page from the home page
 
-The remaining planned feature is notifications.
+### NestJS base
+
+The NestJS base generator creates a lean Nest 11 server with:
+
+- Fastify as the HTTP adapter
+- Swagger at `/docs`
+- a versioned `/api/v1`-style global prefix
+- Prisma configured for MongoDB
+- a health endpoint protected by `HEALTH_TOKEN`
+- OIDC/JWKS Passport JWT auth scaffolding
+- a typed env/config provider
+
+The base intentionally excludes GraphQL, BullMQ, Redis-backed caching, web-push, and LLM tooling so future server features can be added independently.
 
 ## UI direction
 
@@ -203,13 +248,13 @@ If `yo` is not already available on your machine:
 npm install -g yo
 ```
 
-Generate a new base app:
+Generate a new React app:
 
 ```bash
-yo t-generator my-app
+yo t-generator:react-app my-app
 ```
 
-You can also omit the name and let the generator prompt for it:
+Legacy React alias:
 
 ```bash
 yo t-generator
@@ -229,7 +274,14 @@ npm install
 npm run dev
 ```
 
-Add a feature from the generated app root:
+Add a React feature from the generated app root:
+
+```bash
+cd my-app
+yo t-generator:react-add
+```
+
+Legacy React alias:
 
 ```bash
 cd my-app
@@ -248,7 +300,19 @@ The interactive prompt currently lets you choose between, in order:
 - `apollo`
 - `pwa`
 
-If you prefer the explicit form, these still work:
+If you prefer the explicit form, these work:
+
+```bash
+yo t-generator:react-add bff
+yo t-generator:react-add ui-library
+yo t-generator:react-add auth
+yo t-generator:react-add redux
+yo t-generator:react-add react-query
+yo t-generator:react-add apollo
+yo t-generator:react-add pwa
+```
+
+Legacy direct aliases:
 
 ```bash
 yo t-generator:add bff
@@ -258,6 +322,15 @@ yo t-generator:add redux
 yo t-generator:add react-query
 yo t-generator:add apollo
 yo t-generator:add pwa
+```
+
+Generate a NestJS server:
+
+```bash
+yo t-generator:nestjs-app my-server
+cd my-server
+npm install
+npm run dev
 ```
 
 After the BFF files are generated:
@@ -395,6 +468,9 @@ The current test suite covers:
 
 - generation with an explicit app name
 - prompt fallback when the name is omitted
+- generation with the explicit `yo t-generator:react-app` command
+- generation with the explicit `yo t-generator:react-add` command
+- generation with the explicit `yo t-generator:nestjs-app` command
 - prompt-based feature selection for `yo t-generator:add`
 - adding the `bff` feature to an existing generated base app
 - adding the `ui-library` feature to an existing generated base app

@@ -1,0 +1,25 @@
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import * as jwksRsa from 'jwks-rsa';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor() {
+    super({
+      secretOrKeyProvider: jwksRsa.passportJwtSecret({
+        jwksUri: `${process.env.OIDC_AUTHORITY}/.well-known/jwks.json`,
+        cache: true,
+        rateLimit: true,
+      }),
+      audience: process.env.OIDC_AUDIENCE,
+      issuer: `${process.env.OIDC_AUTHORITY}/`,
+      algorithms: ['RS256'],
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    });
+  }
+
+  validate(payload: Record<string, unknown>): Record<string, unknown> {
+    return payload;
+  }
+}
