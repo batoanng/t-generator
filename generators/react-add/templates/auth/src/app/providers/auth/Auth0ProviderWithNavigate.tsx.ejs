@@ -1,10 +1,15 @@
 import type { PropsWithChildren } from 'react';
 import { Auth0Provider } from '@auth0/auth0-react';
+import { z } from 'zod';
 import { env } from '@/shared/config';
 
-type AuthRedirectState = {
-  returnTo?: string;
-};
+const authRedirectStateSchema = z
+  .object({
+    returnTo: z.string().optional(),
+  })
+  .passthrough();
+
+type AuthRedirectState = z.infer<typeof authRedirectStateSchema>;
 
 function getAuthorizationParams() {
   return {
@@ -26,7 +31,8 @@ export function Auth0ProviderWithNavigate({
       clientId={env.auth0.clientId}
       authorizationParams={getAuthorizationParams()}
       onRedirectCallback={(appState?: AuthRedirectState) => {
-        const returnTo = appState?.returnTo || '/auth';
+        const redirectState = authRedirectStateSchema.parse(appState ?? {});
+        const returnTo = redirectState.returnTo || '/auth';
         const redirectUrl = new URL(returnTo, window.location.origin);
 
         window.location.replace(redirectUrl.toString());

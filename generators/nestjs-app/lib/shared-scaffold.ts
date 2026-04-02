@@ -27,7 +27,7 @@ const BASE_DEPENDENCIES: Record<string, string> = {
   'passport-jwt': '^4.0.1',
   'reflect-metadata': '^0.2.2',
   'rxjs': '^7.8.2',
-  'zod': '^3.23.8',
+  'zod': '^3.24.2',
 };
 
 const BASE_DEV_DEPENDENCIES: Record<string, string> = {
@@ -94,8 +94,8 @@ const BASE_CONFIG_FIELDS: ConfigField[] = [
   },
   {
     name: 'SWAGGER_ENABLE',
-    type: 'number',
-    schema: 'z.coerce.number().int().min(0).max(1)',
+    type: 'boolean',
+    schema: 'booleanFlagSchema',
     sample: '1',
   },
   {
@@ -113,7 +113,7 @@ const BASE_CONFIG_FIELDS: ConfigField[] = [
   {
     name: 'OIDC_AUTHORITY',
     type: 'string',
-    schema: 'z.string().url()',
+    schema: 'oidcAuthoritySchema',
     sample: 'https://example.auth0.com',
   },
   {
@@ -124,8 +124,8 @@ const BASE_CONFIG_FIELDS: ConfigField[] = [
   },
   {
     name: 'CORS_ORIGIN',
-    type: 'string',
-    schema: 'z.string().min(1).optional()',
+    type: 'string[]',
+    schema: 'corsOriginSchema',
     sample: 'http://localhost:5173',
     optional: true,
   },
@@ -147,14 +147,14 @@ const REDIS_CONFIG_FIELDS: ConfigField[] = [
   {
     name: 'REDIS_USERNAME',
     type: 'string',
-    schema: 'z.string().min(1).optional()',
+    schema: 'optionalStringSchema',
     sample: 'default',
     optional: true,
   },
   {
     name: 'REDIS_PASSWORD',
     type: 'string',
-    schema: 'z.string().min(1).optional()',
+    schema: 'optionalStringSchema',
     sample: 'change-me',
     optional: true,
   },
@@ -164,7 +164,7 @@ const WEB_PUSH_CONFIG_FIELDS: ConfigField[] = [
   {
     name: 'WEB_PUSH_CONTACT',
     type: 'string',
-    schema: 'z.string().url()',
+    schema: 'urlStringSchema',
     sample: 'mailto:hello@example.com',
   },
   {
@@ -197,7 +197,7 @@ const LLM_CONFIG_FIELDS: ConfigField[] = [
   {
     name: 'DEEPSEEK_API_KEY',
     type: 'string',
-    schema: 'z.string().min(1).optional()',
+    schema: 'optionalStringSchema',
     sample: 'deepseek-key',
     optional: true,
   },
@@ -307,49 +307,128 @@ function renderEnvExample(
 }
 
 function renderConfigType(features: InstalledServerFeatures): string {
-  const lines = ['export interface Config {'];
+  const lines = [
+    "import { z } from 'zod';",
+    '',
+    'function trimString(value: unknown): unknown {',
+    "  return typeof value === 'string' ? value.trim() : value;",
+    '}',
+    '',
+    'function toOptionalTrimmedString(value: unknown): unknown {',
+    "  if (typeof value !== 'string') {",
+    '    return value;',
+    '  }',
+    '',
+    '  const trimmed = value.trim();',
+    '',
+    '  return trimmed.length > 0 ? trimmed : undefined;',
+    '}',
+    '',
+    'function toBooleanFlag(value: unknown): unknown {',
+    "  if (typeof value === 'boolean') {",
+    '    return value;',
+    '  }',
+    '',
+    "  if (typeof value === 'number') {",
+    '    return value !== 0;',
+    '  }',
+    '',
+    "  if (typeof value === 'string') {",
+    "    const normalized = value.trim().toLowerCase();",
+    '',
+    "    if (normalized === '1' || normalized === 'true') {",
+    '      return true;',
+    '    }',
+    '',
+    "    if (normalized === '0' || normalized === 'false') {",
+    '      return false;',
+    '    }',
+    '  }',
+    '',
+    '  return value;',
+    '}',
+    '',
+    'function toOriginList(value: unknown): unknown {',
+    "  if (typeof value !== 'string') {",
+    '    return value;',
+    '  }',
+    '',
+    '  const origins = value',
+    "    .split(',')",
+    '    .map((entry) => entry.trim())',
+    '    .filter(Boolean);',
+    '',
+    '  return origins.length > 0 ? origins : undefined;',
+    '}',
+    '',
+    'function stripTrailingSlash(value: string): string {',
+    "  return value.replace(/\\/+$/, '');",
+    '}',
+    '',
+    'const stringSchema = z.preprocess(trimString, z.string().min(1));',
+    'const optionalStringSchema = z.preprocess(',
+    '  toOptionalTrimmedString,',
+    '  z.string().min(1).optional(),',
+    ');',
+    'const urlStringSchema = z.preprocess(trimString, z.string().url());',
+    'const booleanFlagSchema = z.preprocess(toBooleanFlag, z.boolean());',
+    'const corsOriginSchema = z.preprocess(',
+    '  toOriginList,',
+    '  z.array(z.string().min(1)).optional(),',
+    ');',
+    'const oidcAuthoritySchema = urlStringSchema.transform(stripTrailingSlash);',
+    '',
+    'export const configSchema = z.object({',
+  ];
 
   getConfigFields(features).forEach((field) => {
-    const optionalMarker = field.optional ? '?' : '';
-
-    lines.push(`  readonly ${field.name}${optionalMarker}: ${field.type};`);
+    lines.push(`  ${field.name}: ${field.schema},`);
   });
 
+  lines.push('});');
+  lines.push('');
+  lines.push('export type Config = z.infer<typeof configSchema>;');
+  lines.push('');
+  lines.push('let cachedConfig: Config | undefined;');
+  lines.push('');
+  lines.push('function formatConfigError(error: z.ZodError): string {');
+  lines.push('  const fieldErrors = error.flatten().fieldErrors;');
+  lines.push(
+    "  return `Configuration not valid:\\n${JSON.stringify(fieldErrors, null, 2)}`;",
+  );
   lines.push('}');
+  lines.push('');
+  lines.push('export function getConfig(): Config {');
+  lines.push('  if (cachedConfig) {');
+  lines.push('    return cachedConfig;');
+  lines.push('  }');
+  lines.push('');
+  lines.push('  const result = configSchema.safeParse(process.env);');
+  lines.push('');
+  lines.push('  if (!result.success) {');
+  lines.push('    throw new Error(formatConfigError(result.error));');
+  lines.push('  }');
+  lines.push('');
+  lines.push('  cachedConfig = Object.freeze(result.data);');
+  lines.push('');
+  lines.push('  return cachedConfig;');
+  lines.push('}');
+  lines.push('');
+  lines.push('export const config = getConfig();');
 
   return `${lines.join('\n')}\n`;
 }
 
-function renderConfigProvider(features: InstalledServerFeatures): string {
+function renderConfigProvider(_features: InstalledServerFeatures): string {
   const lines = [
-    "import { z } from 'zod';",
-    '',
-    "import type { Config } from '../../../types/config';",
+    "import { getConfig } from '../../../types/config';",
     "import { Service } from '../../tokens';",
     '',
     'export const configProvider = {',
     '  provide: Service.CONFIG,',
-    '  useFactory: (): Config => {',
-    '    const validationSchema = z.object({',
+    '  useFactory: getConfig,',
   ];
 
-  getConfigFields(features).forEach((field) => {
-    lines.push(`      ${field.name}: ${field.schema},`);
-  });
-
-  lines.push('    });');
-  lines.push('');
-  lines.push('    const result = validationSchema.safeParse(process.env);');
-  lines.push('');
-  lines.push('    if (!result.success) {');
-  lines.push('      const errors = result.error.flatten().fieldErrors;');
-  lines.push(
-    "      throw new Error(`Configuration not valid:\\n${JSON.stringify(errors, null, 2)}`);",
-  );
-  lines.push('    }');
-  lines.push('');
-  lines.push('    return result.data;');
-  lines.push('  },');
   lines.push('};');
 
   return `${lines.join('\n')}\n`;
@@ -393,18 +472,22 @@ function renderAppModule(features: InstalledServerFeatures): string {
     "import { CommonModule } from './common';",
   );
 
+  if (features.queue || features.webPush) {
+    imports.push("import { config } from '../types/config';");
+  }
+
   const lines = [...imports, ''];
 
   if (features.webPush) {
     lines.push('function toRedisUrl(): string {');
-    lines.push("  const username = process.env.REDIS_USERNAME?.trim();");
-    lines.push("  const password = process.env.REDIS_PASSWORD?.trim();");
+    lines.push('  const username = config.REDIS_USERNAME;');
+    lines.push('  const password = config.REDIS_PASSWORD;');
     lines.push(
       '  const auth = username && password ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@` : \'\';',
     );
     lines.push('');
     lines.push(
-      "  return `redis://${auth}${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;",
+      '  return `redis://${auth}${config.REDIS_HOST}:${config.REDIS_PORT}`;',
     );
     lines.push('}');
     lines.push('');
@@ -436,10 +519,10 @@ function renderAppModule(features: InstalledServerFeatures): string {
   if (features.queue) {
     lines.push('    BullModule.forRoot({');
     lines.push('      connection: {');
-    lines.push('        host: process.env.REDIS_HOST,');
-    lines.push('        port: Number(process.env.REDIS_PORT || 6379),');
-    lines.push('        username: process.env.REDIS_USERNAME || undefined,');
-    lines.push('        password: process.env.REDIS_PASSWORD || undefined,');
+    lines.push('        host: config.REDIS_HOST,');
+    lines.push('        port: config.REDIS_PORT,');
+    lines.push('        username: config.REDIS_USERNAME,');
+    lines.push('        password: config.REDIS_PASSWORD,');
     lines.push('      },');
     lines.push('    }),');
   }

@@ -21,7 +21,10 @@ import {
   resolveTemplateAbsolutePath,
   toDisplayName,
 } from './lib/helpers';
-import { buildSharedScaffold } from './lib/shared-scaffold';
+import {
+  buildSharedScaffold,
+  REACT_SHARED_DEPENDENCIES,
+} from './lib/shared-scaffold';
 import type {
   FeatureDefinition,
   InstalledFeatures,
@@ -366,6 +369,7 @@ export = class AddGenerator extends GeneratorBase {
   }
 
   _writeSharedScaffold(features: InstalledFeatures): void {
+    this._writeDependencies(REACT_SHARED_DEPENDENCIES);
     const scaffoldFiles = buildSharedScaffold(this.templateContext, features);
 
     Object.entries(scaffoldFiles).forEach(([filePath, contents]) => {

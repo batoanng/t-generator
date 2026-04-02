@@ -10,16 +10,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { ApplicationModule } from './modules/app.module';
 import { CommonModule, LogInterceptor } from './modules/common';
+import { config } from './types/config';
 
-const API_DEFAULT_PORT = 3001;
-const API_DEFAULT_VERSION = 1;
 const SWAGGER_PREFIX = '/docs';
 const SWAGGER_TITLE = '<%= appDisplayName %> API';
 const SWAGGER_DESCRIPTION =
   'REST API scaffold for <%= appDisplayName %>. Swagger documents the generated NestJS base endpoints.';
 
 function createSwagger(app: INestApplication): void {
-  const apiVersion = String(process.env.API_VERSION || API_DEFAULT_VERSION);
+  const apiVersion = String(config.API_VERSION);
   const apiBasePath = `/api/v${apiVersion}`;
   const options = new DocumentBuilder()
     .setTitle(SWAGGER_TITLE)
@@ -48,21 +47,20 @@ async function bootstrap(): Promise<void> {
     ApplicationModule,
     adapter,
   );
-  const origins = (process.env.CORS_ORIGIN ?? '')
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean);
 
   app.enableCors({
-    origin: origins.length > 0 ? origins : true,
+    origin:
+      config.CORS_ORIGIN && config.CORS_ORIGIN.length > 0
+        ? config.CORS_ORIGIN
+        : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  app.setGlobalPrefix(`api/v${process.env.API_VERSION || API_DEFAULT_VERSION}`);
+  app.setGlobalPrefix(`api/v${config.API_VERSION}`);
 
-  if ((process.env.SWAGGER_ENABLE ?? '1') !== '0') {
+  if (config.SWAGGER_ENABLE) {
     createSwagger(app);
   }
 
@@ -79,7 +77,7 @@ async function bootstrap(): Promise<void> {
   const logInterceptor = app.select(CommonModule).get(LogInterceptor);
   app.useGlobalInterceptors(logInterceptor);
 
-  const port = Number(process.env.API_PORT || API_DEFAULT_PORT);
+  const port = config.API_PORT;
   await app.listen(port, '0.0.0.0');
 
   console.info(`Server is running on port ${port}`);

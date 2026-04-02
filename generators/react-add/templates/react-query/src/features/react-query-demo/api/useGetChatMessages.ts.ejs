@@ -3,9 +3,16 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { z } from 'zod';
 import { apiClient, useApiQuery } from '@/shared/api';
 import { decryptData } from '@/shared/lib';
-import { CacheKeys, type ChatMessage } from '../model';
+import {
+  CacheKeys,
+  chatMessageSchema,
+  type ChatMessage,
+} from '../model';
+
+const encryptedMessagesSchema = z.string().array();
 
 export const useGetChatMessages = (
   sessionId: string,
@@ -16,11 +23,12 @@ export const useGetChatMessages = (
   return useApiQuery<ChatMessage[], AxiosError>({
     queryKey: [CacheKeys.getChatMessages, sessionId],
     queryFn: async () => {
-      const { data } = await apiClient.get<string[]>(`/chat/message/${sessionId}`);
+      const { data } = await apiClient.get<unknown>(`/chat/message/${sessionId}`);
+      const encryptedMessages = encryptedMessagesSchema.parse(data);
       const messages: ChatMessage[] = [];
 
-      for (const token of data) {
-        messages.push(await decryptData<ChatMessage>(token));
+      for (const token of encryptedMessages) {
+        messages.push(await decryptData(token, chatMessageSchema));
       }
 
       return messages;

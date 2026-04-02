@@ -1,7 +1,11 @@
-export interface ChatMessage {
-  id: string;
-  input: string;
-  output: string;
-  sessionId: string;
-  createdAt: string;
-}
+import { z } from 'zod';
+
+export const chatMessageSchema = z.object({
+  id: z.string().min(1),
+  input: z.string(),
+  output: z.string(),
+  sessionId: z.string().min(1),
+  createdAt: z.string().min(1),
+});
+
+export type ChatMessage = z.infer<typeof chatMessageSchema>;

@@ -13,6 +13,10 @@ const SHARED_SCAFFOLD_PATHS = [
 
 type SharedScaffoldPath = (typeof SHARED_SCAFFOLD_PATHS)[number];
 
+export const REACT_SHARED_DEPENDENCIES = {
+  zod: '^3.24.2',
+} as const;
+
 function indent(value: string, spaces: number): string {
   const padding = ' '.repeat(spaces);
 
@@ -85,7 +89,11 @@ function renderEnvConfig(
   context: TemplateContext,
   features: InstalledFeatures,
 ): string {
-  const lines = [`const fallbackAppName = '${context.appDisplayName}';`];
+  const lines = [
+    "import { z } from 'zod';",
+    '',
+    `const fallbackAppName = ${JSON.stringify(context.appDisplayName)};`,
+  ];
 
   if (features.auth) {
     lines.push(
@@ -97,32 +105,44 @@ function renderEnvConfig(
     lines.push(
       "const auth0Audience = import.meta.env.VITE_AUTH0_AUDIENCE?.trim() || '';",
     );
+    lines.push('');
+    lines.push('const auth0ConfigSchema = z.object({');
+    lines.push('  domain: z.string(),');
+    lines.push('  clientId: z.string(),');
+    lines.push('  audience: z.string(),');
+    lines.push('  isConfigured: z.boolean(),');
+    lines.push('});');
   }
 
+  const envSchemaLines = ['appName: z.string().trim().min(1),'];
   const envLines = [
     'appName: import.meta.env.VITE_APP_NAME?.trim() || fallbackAppName,',
   ];
 
   if (features.redux) {
+    envSchemaLines.push('enableReduxLogging: z.boolean(),');
     envLines.push(
       "enableReduxLogging: import.meta.env.VITE_ENABLE_REDUX_LOGGING === 'true',",
     );
   }
 
   if (features.reactQuery) {
+    envSchemaLines.push('apiBaseUrl: z.string().trim().min(1),');
     envLines.push(
       "apiBaseUrl: import.meta.env.VITE_API_BASE_URL?.trim() || '/api',",
     );
   }
 
   if (features.apollo) {
+    envSchemaLines.push('graphqlUrl: z.string().trim().min(1),');
     envLines.push(
       "graphqlUrl: import.meta.env.VITE_GRAPHQL_URL?.trim() || '/graphql',",
     );
   }
 
   if (features.auth) {
-    envLines.push('auth0: Object.freeze({');
+    envSchemaLines.push('auth0: auth0ConfigSchema,');
+    envLines.push('auth0: {');
     envLines.push('  domain: auth0Domain,');
     envLines.push('  clientId: auth0ClientId,');
     envLines.push('  audience: auth0Audience,');
@@ -133,9 +153,17 @@ function renderEnvConfig(
   }
 
   lines.push('');
-  lines.push('export const env = Object.freeze({');
-  lines.push(indent(envLines.join('\n'), 2));
+  lines.push('export const envSchema = z.object({');
+  lines.push(indent(envSchemaLines.join('\n'), 2));
   lines.push('});');
+  lines.push('');
+  lines.push('export type Env = z.infer<typeof envSchema>;');
+  lines.push('');
+  lines.push('export const env = Object.freeze(');
+  lines.push('  envSchema.parse({');
+  lines.push(indent(envLines.join('\n'), 4));
+  lines.push('  }),');
+  lines.push(');');
 
   return `${lines.join('\n')}\n`;
 }

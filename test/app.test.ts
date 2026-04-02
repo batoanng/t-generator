@@ -87,6 +87,7 @@ test('generates the React base app with the expected project structure', async (
     'react',
     'react-dom',
     'react-router-dom',
+    'zod',
   ]);
 
   blockedDependencies.forEach((dependencyName) => {
@@ -135,6 +136,14 @@ test('generates the React base app with the expected project structure', async (
   yoAssert.fileContent(
     path.join(projectRoot, 'src/shared/config/env.ts'),
     'appName: import.meta.env.VITE_APP_NAME?.trim() || fallbackAppName',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/shared/config/env.ts'),
+    "import { z } from 'zod';",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/shared/config/env.ts'),
+    'export const envSchema = z.object({',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/app/routes/AppRouter.tsx'),

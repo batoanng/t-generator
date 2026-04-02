@@ -1,4 +1,9 @@
+import { z } from 'zod';
+
 // Replace this example transform with your real payload decoding logic when needed.
-export async function decryptData<T>(payload: string): Promise<T> {
-  return JSON.parse(payload) as T;
+export async function decryptData<TSchema extends z.ZodTypeAny>(
+  payload: string,
+  schema: TSchema,
+): Promise<z.infer<TSchema>> {
+  return schema.parse(JSON.parse(payload));
 }

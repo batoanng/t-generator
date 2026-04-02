@@ -138,7 +138,31 @@ test('generates the NestJS base app with the expected project structure', async 
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'src/types/config.ts'),
-    'readonly DATABASE_URL: string;',
+    'export const configSchema = z.object({',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/types/config.ts'),
+    'export type Config = z.infer<typeof configSchema>;',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/types/config.ts'),
+    'export function getConfig(): Config {',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/server.ts'),
+    'const port = config.API_PORT;',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/modules/common/security/health.guard.ts'),
+    'constructor(@Inject(Service.CONFIG) private readonly config: Config) {}',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/modules/auth/jwt.strategy.ts'),
+    'return jwtPayloadSchema.parse(payload);',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/modules/auth/auth.module.ts'),
+    'CommonModule',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'vitest.config.ts'),
