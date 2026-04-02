@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Yeoman generators for bootstrapping React apps and lean NestJS servers.",
   "type": "commonjs",
-  "main": "generators/app/index.ts",
+  "main": "generators/index.ts",
   "files": [
     "generators",
     "README.md"

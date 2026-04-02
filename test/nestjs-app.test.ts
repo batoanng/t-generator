@@ -23,13 +23,18 @@ const blockedDependencies = [
   '@nestjs/bullmq',
   '@nestjs/cache-manager',
   '@nestjs/graphql',
+  '@types/jest',
+  '@types/supertest',
   'bullmq',
   'cache-manager',
   'graphql',
+  'jest',
   'openai',
   'react',
   'react-dom',
   'react-router-dom',
+  'supertest',
+  'ts-jest',
   'vite',
   'web-push',
 ];
@@ -39,12 +44,15 @@ test('generates the NestJS base app with the expected project structure', async 
   const packageJson = readJson<PackageJson>(
     path.join(projectRoot, 'package.json'),
   );
+  const hasPackageDependency = (dependencyName: string): boolean =>
+    typeof packageJson.dependencies?.[dependencyName] === 'string' ||
+    typeof packageJson.devDependencies?.[dependencyName] === 'string';
 
   yoAssert.file([
     path.join(projectRoot, 'package.json'),
     path.join(projectRoot, 'tsconfig.json'),
     path.join(projectRoot, 'tsconfig.eslint.json'),
-    path.join(projectRoot, 'jest.config.js'),
+    path.join(projectRoot, 'vitest.config.ts'),
     path.join(projectRoot, 'nodemon.json'),
     path.join(projectRoot, 'index.js'),
     path.join(projectRoot, '.eslintrc.cjs'),
@@ -65,6 +73,7 @@ test('generates the NestJS base app with the expected project structure', async 
     path.join(projectRoot, 'src/modules/common/security/health.guard.ts'),
     path.join(projectRoot, 'src/modules/auth/auth.module.ts'),
     path.join(projectRoot, 'src/modules/auth/jwt.strategy.ts'),
+    path.join(projectRoot, 'src/test/health.test.ts'),
     path.join(projectRoot, 'src/modules/tokens.ts'),
     path.join(projectRoot, 'src/types/config.ts'),
   ]);
@@ -87,6 +96,7 @@ test('generates the NestJS base app with the expected project structure', async 
     '@nestjs/passport',
     '@nestjs/platform-fastify',
     '@nestjs/swagger',
+    '@nestjs/testing',
     '@nestjs/terminus',
     '@prisma/client',
     'fastify',
@@ -95,13 +105,10 @@ test('generates the NestJS base app with the expected project structure', async 
     'passport-jwt',
     'reflect-metadata',
     'rxjs',
+    'vitest',
     'zod',
   ].forEach((dependencyName) => {
-    assert.equal(
-      typeof packageJson.dependencies?.[dependencyName],
-      'string',
-      `${dependencyName} should exist`,
-    );
+    assert.equal(hasPackageDependency(dependencyName), true, `${dependencyName} should exist`);
   });
 
   blockedDependencies.forEach((dependencyName) => {
@@ -133,9 +140,27 @@ test('generates the NestJS base app with the expected project structure', async 
     path.join(projectRoot, 'src/types/config.ts'),
     'readonly DATABASE_URL: string;',
   );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'vitest.config.ts'),
+    "include: ['src/**/*.test.ts']",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'vitest.config.ts'),
+    "'@server': fileURLToPath(new URL('./src', import.meta.url))",
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/test/health.test.ts'),
+    'app.inject({',
+  );
+  yoAssert.fileContent(
+    path.join(projectRoot, 'src/test/health.test.ts'),
+    "service: 'starter-server'",
+  );
+  assert.equal(packageJson.scripts?.test, 'vitest run');
 
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/main.tsx')), false);
   assert.equal(fs.existsSync(path.join(projectRoot, 'vite.config.ts')), false);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'jest.config.js')), false);
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/pages')), false);
   assert.equal(
     fs.existsSync(path.join(projectRoot, 'src/modules/queue')),

@@ -17,7 +17,7 @@ const distPackageJson: PackageJson = {
   version: rootPackageJson.version,
   description: rootPackageJson.description,
   type: 'commonjs',
-  main: 'generators/app/index.js',
+  main: 'generators/index.js',
   files: ['generators', 'README.md'],
   keywords: rootPackageJson.keywords,
   engines: rootPackageJson.engines,

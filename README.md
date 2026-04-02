@@ -16,12 +16,6 @@ Primary React base command:
 yo t-generator:react-app [appName]
 ```
 
-Legacy React alias:
-
-```bash
-yo t-generator [appName]
-```
-
 Primary React feature commands:
 
 ```bash
@@ -33,19 +27,6 @@ yo t-generator:react-add redux
 yo t-generator:react-add react-query
 yo t-generator:react-add apollo
 yo t-generator:react-add pwa
-```
-
-Legacy React feature aliases:
-
-```bash
-yo t-generator:add
-yo t-generator:add bff
-yo t-generator:add ui-library
-yo t-generator:add auth
-yo t-generator:add redux
-yo t-generator:add react-query
-yo t-generator:add apollo
-yo t-generator:add pwa
 ```
 
 NestJS base command:
@@ -92,6 +73,7 @@ The NestJS base generator creates a lean Nest 11 server with:
 - a health endpoint protected by `HEALTH_TOKEN`
 - OIDC/JWKS Passport JWT auth scaffolding
 - a typed env/config provider
+- Vitest plus a starter Fastify injection test
 
 The base intentionally excludes GraphQL, BullMQ, Redis-backed caching, web-push, and LLM tooling so future server features can be added independently.
 
@@ -254,17 +236,17 @@ Generate a new React app:
 yo t-generator:react-app my-app
 ```
 
-Legacy React alias:
-
-```bash
-yo t-generator
-```
-
 Behavior of the current command:
 
 - The generator creates a new directory named after the normalized app name.
 - It fails if the target directory already exists and is not empty.
 - It writes files only. It does not automatically install dependencies or initialize Git.
+
+Show the available explicit generators:
+
+```bash
+yo t-generator
+```
 
 After generation, move into the new app and start it:
 
@@ -279,13 +261,6 @@ Add a React feature from the generated app root:
 ```bash
 cd my-app
 yo t-generator:react-add
-```
-
-Legacy React alias:
-
-```bash
-cd my-app
-yo t-generator:add
 ```
 
 Every add-on command validates that the current directory still contains the generated base app before writing managed files.
@@ -310,18 +285,6 @@ yo t-generator:react-add redux
 yo t-generator:react-add react-query
 yo t-generator:react-add apollo
 yo t-generator:react-add pwa
-```
-
-Legacy direct aliases:
-
-```bash
-yo t-generator:add bff
-yo t-generator:add ui-library
-yo t-generator:add auth
-yo t-generator:add redux
-yo t-generator:add react-query
-yo t-generator:add apollo
-yo t-generator:add pwa
 ```
 
 Generate a NestJS server:
@@ -471,7 +434,8 @@ The current test suite covers:
 - generation with the explicit `yo t-generator:react-app` command
 - generation with the explicit `yo t-generator:react-add` command
 - generation with the explicit `yo t-generator:nestjs-app` command
-- prompt-based feature selection for `yo t-generator:add`
+- help output for `yo t-generator`
+- prompt-based feature selection for `yo t-generator:react-add`
 - adding the `bff` feature to an existing generated base app
 - adding the `ui-library` feature to an existing generated base app
 - adding the `auth` feature to an existing generated base app

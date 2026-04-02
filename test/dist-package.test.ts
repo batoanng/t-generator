@@ -6,8 +6,6 @@ import yoAssert from 'yeoman-assert';
 
 import type { PackageJson } from '../generators/lib/types';
 import {
-  addGeneratorPath,
-  appGeneratorPath,
   createYeomanTestHelpers,
   nestjsAppGeneratorPath,
   reactAddGeneratorPath,
@@ -31,8 +29,7 @@ distSmokeTest(
     yoAssert.file([
       path.join(distRoot, 'README.md'),
       path.join(distRoot, 'package.json'),
-      path.join(distRoot, 'generators/app/index.js'),
-      path.join(distRoot, 'generators/add/index.js'),
+      path.join(distRoot, 'generators/index.js'),
       path.join(distRoot, 'generators/react-app/index.js'),
       path.join(distRoot, 'generators/react-app/templates/package.json.ejs'),
       path.join(distRoot, 'generators/react-add/index.js'),
@@ -58,14 +55,14 @@ distSmokeTest(
       ),
     ]);
 
-    assert.equal(distPackageJson.main, 'generators/app/index.js');
+    assert.equal(distPackageJson.main, 'generators/index.js');
     assert.deepEqual(distPackageJson.files, ['generators', 'README.md']);
 
     let tmpDir = '';
     const helpers = await createYeomanTestHelpers();
 
     const runResult = await helpers
-      .run(appGeneratorPath)
+      .run(reactAppGeneratorPath)
       .inTmpDir((directory) => {
         tmpDir = directory;
       })
@@ -76,7 +73,11 @@ distSmokeTest(
     yoAssert.file([path.join(projectRoot, 'package.json')]);
 
     await runResult
-      .create(addGeneratorPath, { cwd: projectRoot, tmpdir: false }, undefined)
+      .create(
+        reactAddGeneratorPath,
+        { cwd: projectRoot, tmpdir: false },
+        undefined,
+      )
       .withArguments(['pwa'])
       .run();
 

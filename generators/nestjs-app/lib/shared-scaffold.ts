@@ -31,25 +31,22 @@ const BASE_DEPENDENCIES: Record<string, string> = {
 };
 
 const BASE_DEV_DEPENDENCIES: Record<string, string> = {
+  '@nestjs/testing': '^11.1.6',
   '@trivago/prettier-plugin-sort-imports': '^6.0.2',
-  '@types/jest': '^29.5.14',
   '@types/node': '^24.9.0',
   '@types/passport-jwt': '^4.0.1',
-  '@types/supertest': '^6.0.3',
   '@typescript-eslint/eslint-plugin': '^8.46.2',
   '@typescript-eslint/parser': '^8.46.2',
   'env-cmd': '^11.0.0',
   'eslint': '^8.57.1',
-  'jest': '^29.7.0',
   'nodemon': '^3.1.10',
   'prettier': '^3.8.1',
   'prisma': '^6.15.0',
-  'supertest': '^7.1.4',
-  'ts-jest': '^29.2.5',
   'ts-node': '^10.9.2',
   'tsc-alias': '^1.8.16',
   'tsconfig-paths': '^4.2.0',
   'typescript': '^5.9.3',
+  'vitest': '^3',
 };
 
 const GRAPHQL_DEPENDENCIES: Record<string, string> = {
@@ -282,7 +279,7 @@ function renderPackageJson(
       start: 'node dist/server.js',
       dev: 'env-cmd -f .env nodemon',
       build: 'tsc -p tsconfig.json && tsc-alias -p tsconfig.json',
-      test: 'jest --config=jest.config.js',
+      test: 'vitest run',
       lint: "eslint -c .eslintrc.cjs --ext .ts 'src/**/*.ts'",
       'prisma:generate': 'prisma generate',
       'prisma:push': 'prisma db push',

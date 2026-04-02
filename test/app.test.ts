@@ -6,7 +6,12 @@ import test from 'node:test';
 import yoAssert from 'yeoman-assert';
 
 import type { PackageJson } from '../generators/lib/types';
-import { appGeneratorPath, createYeomanTestHelpers, readJson } from './helpers';
+import {
+  createYeomanTestHelpers,
+  readJson,
+  reactAppGeneratorPath,
+  rootGeneratorPath,
+} from './helpers';
 
 const blockedDependencies = [
   '@batoanng/mui-components',
@@ -32,12 +37,12 @@ const blockedDependencies = [
   'notistack',
 ];
 
-test('generates the base app with the expected project structure', async () => {
+test('generates the React base app with the expected project structure', async () => {
   let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
 
   await helpers
-    .run(appGeneratorPath)
+    .run(reactAppGeneratorPath)
     .inTmpDir((directory) => {
       tmpDir = directory;
     })
@@ -141,27 +146,33 @@ test('generates the base app with the expected project structure', async () => {
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
-    'yo t-generator:add',
+    'yo t-generator:react-add',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
-    'yo t-generator:add auth',
+    'yo t-generator:react-add auth',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
-    'yo t-generator:add redux',
+    'yo t-generator:react-add redux',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
-    'yo t-generator:add react-query',
+    'yo t-generator:react-add react-query',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
-    'yo t-generator:add apollo',
+    'yo t-generator:react-add apollo',
   );
   yoAssert.fileContent(
     path.join(projectRoot, 'README.md'),
-    'yo t-generator:add pwa',
+    'yo t-generator:react-add pwa',
+  );
+  assert.equal(
+    fs.readFileSync(path.join(projectRoot, 'README.md'), 'utf8').includes(
+      'yo t-generator:add',
+    ),
+    false,
   );
 });
 
@@ -170,7 +181,7 @@ test('prompts for the app name when one is not provided', async () => {
   const helpers = await createYeomanTestHelpers();
 
   await helpers
-    .run(appGeneratorPath)
+    .run(reactAppGeneratorPath)
     .inTmpDir((directory) => {
       tmpDir = directory;
     })
@@ -188,14 +199,14 @@ test('prompts for the app name when one is not provided', async () => {
   );
 });
 
-test('fails when the target directory already exists and is not empty', async () => {
+test('fails when the React target directory already exists and is not empty', async () => {
   let tmpDir = '';
   const helpers = await createYeomanTestHelpers();
 
   await assert.rejects(
     async () =>
       helpers
-        .run(appGeneratorPath)
+        .run(reactAppGeneratorPath)
         .inTmpDir((directory) => {
           tmpDir = directory;
           const targetDirectory = path.join(directory, 'existing-app');
@@ -212,4 +223,32 @@ test('fails when the target directory already exists and is not empty', async ()
     fs.existsSync(path.join(tmpDir, 'existing-app', 'keep.txt')),
     true,
   );
+});
+
+test('root generator shows explicit command help without scaffolding files', async () => {
+  let tmpDir = '';
+  const helpers = await createYeomanTestHelpers();
+  const logMessages: string[] = [];
+
+  await helpers
+    .run(rootGeneratorPath)
+    .inTmpDir((directory) => {
+      tmpDir = directory;
+    })
+    .onGenerator((generator) => {
+      const originalLog = generator.log.bind(generator);
+
+      generator.log = ((...args: unknown[]) => {
+        logMessages.push(args.map(String).join(' '));
+        return originalLog(...args);
+      }) as typeof generator.log;
+    });
+
+  assert.deepEqual(fs.readdirSync(tmpDir), []);
+
+  const combinedOutput = logMessages.join('\n');
+
+  assert.match(combinedOutput, /yo t-generator:react-app/);
+  assert.match(combinedOutput, /yo t-generator:react-add/);
+  assert.match(combinedOutput, /yo t-generator:nestjs-app/);
 });

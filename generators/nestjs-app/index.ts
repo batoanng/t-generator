@@ -116,7 +116,7 @@ export = class NestAppGenerator extends GeneratorBase {
     const templateFiles = [
       ['tsconfig.json.ejs', 'tsconfig.json'],
       ['tsconfig.eslint.json.ejs', 'tsconfig.eslint.json'],
-      ['jest.config.js.ejs', 'jest.config.js'],
+      ['vitest.config.ts.ejs', 'vitest.config.ts'],
       ['nodemon.json.ejs', 'nodemon.json'],
       ['index.js.ejs', 'index.js'],
       ['_eslintrc.cjs.ejs', '.eslintrc.cjs'],
@@ -136,6 +136,7 @@ export = class NestAppGenerator extends GeneratorBase {
       ['src/modules/common/security/health.guard.ts.ejs', 'src/modules/common/security/health.guard.ts'],
       ['src/modules/auth/auth.module.ts.ejs', 'src/modules/auth/auth.module.ts'],
       ['src/modules/auth/jwt.strategy.ts.ejs', 'src/modules/auth/jwt.strategy.ts'],
+      ['src/test/health.test.ts.ejs', 'src/test/health.test.ts'],
       ['src/modules/tokens.ts.ejs', 'src/modules/tokens.ts'],
     ] as const;
 

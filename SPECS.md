@@ -142,7 +142,7 @@ This command creates the initial React + TypeScript project.
 Example:
 
 ```bash
-yo t-generator
+yo t-generator:react-app my-app
 ```
 
 Responsibilities:
@@ -163,13 +163,13 @@ This command adds one feature into an existing generated project.
 Example:
 
 ```bash
-yo t-generator:add bff
-yo t-generator:add ui-library
-yo t-generator:add auth
-yo t-generator:add redux
-yo t-generator:add react-query
-yo t-generator:add apollo
-yo t-generator:add pwa
+yo t-generator:react-add bff
+yo t-generator:react-add ui-library
+yo t-generator:react-add auth
+yo t-generator:react-add redux
+yo t-generator:react-add react-query
+yo t-generator:react-add apollo
+yo t-generator:react-add pwa
 ```
 
 Responsibilities:

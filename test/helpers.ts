@@ -15,14 +15,9 @@ const generatorRoot = useDistBuild
 
 export const appGeneratorPath = path.join(
   generatorRoot,
-  'app',
   `index${generatorExtension}`,
 );
-export const addGeneratorPath = path.join(
-  generatorRoot,
-  'add',
-  `index${generatorExtension}`,
-);
+export const rootGeneratorPath = appGeneratorPath;
 export const reactAppGeneratorPath = path.join(
   generatorRoot,
   'react-app',
@@ -33,6 +28,7 @@ export const reactAddGeneratorPath = path.join(
   'react-add',
   `index${generatorExtension}`,
 );
+export const addGeneratorPath = reactAddGeneratorPath;
 export const nestjsAppGeneratorPath = path.join(
   generatorRoot,
   'nestjs-app',
@@ -106,7 +102,7 @@ export async function scaffoldAppWithGenerator(
 }
 
 export async function scaffoldBaseApp(appName: string) {
-  return scaffoldAppWithGenerator(appGeneratorPath, appName);
+  return scaffoldAppWithGenerator(reactAppGeneratorPath, appName);
 }
 
 export async function scaffoldReactApp(appName: string) {
