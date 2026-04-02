@@ -6,7 +6,8 @@ The current implementation covers:
 
 - a base React + TypeScript + Vite scaffold
 - seven React add-on features: `bff`, `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa`
-- a separate lean NestJS + Fastify + Prisma server base scaffold
+- a lean NestJS + Fastify + Prisma server base scaffold
+- four NestJS server add-on features: `graphql`, `queue`, `cache`, and `llm`
 
 The long-term direction is described in [SPECS.md](./SPECS.md).
 
@@ -33,6 +34,16 @@ NestJS base command:
 
 ```bash
 yo t-generator:nestjs-app [appName]
+```
+
+Primary NestJS feature commands:
+
+```bash
+yo t-generator:nestjs-add
+yo t-generator:nestjs-add graphql
+yo t-generator:nestjs-add queue
+yo t-generator:nestjs-add cache
+yo t-generator:nestjs-add llm
 ```
 
 ## What the generators create today
@@ -75,7 +86,14 @@ The NestJS base generator creates a lean Nest 11 server with:
 - a typed env/config provider
 - Vitest plus a starter Fastify injection test
 
-The base intentionally excludes GraphQL, BullMQ, Redis-backed caching, web-push, and LLM tooling so future server features can be added independently.
+The base intentionally excludes GraphQL, BullMQ, Redis-backed caching, and LLM tooling until you add them with `yo t-generator:nestjs-add`.
+
+The implemented NestJS server add-ons are:
+
+- `graphql`, which adds code-first Apollo/Nest GraphQL infrastructure at `/api/graphql`, preserves raw request access in GraphQL context, passes through `x-guest-user-id`, and generates a self-contained demo resolver and GraphQL-only auth helpers
+- `queue`, which adds generic BullMQ infrastructure, shared Redis env, one demo queue registration, queue constants, and a producer/controller example without workers or Prisma-backed job creation
+- `cache`, which adds generic Redis-backed Nest cache infrastructure, shared Redis env, a cache demo controller/service, and cache-manager wiring without depending on Prisma or GraphQL
+- `llm`, which adds an OpenAI client plus a minimal prompt-chain demo endpoint driven by `OPENAI_API_KEY` and `OPENAI_MODEL`
 
 ## UI direction
 
@@ -296,6 +314,29 @@ npm install
 npm run dev
 ```
 
+Add a NestJS server feature from the generated server root:
+
+```bash
+cd my-server
+yo t-generator:nestjs-add
+```
+
+The interactive NestJS feature prompt currently lets you choose between, in order:
+
+- `graphql`
+- `queue`
+- `cache`
+- `llm`
+
+If you prefer the explicit form, these work:
+
+```bash
+yo t-generator:nestjs-add graphql
+yo t-generator:nestjs-add queue
+yo t-generator:nestjs-add cache
+yo t-generator:nestjs-add llm
+```
+
 After the BFF files are generated:
 
 ```bash
@@ -356,7 +397,21 @@ npm run dev
 
 Then open `/pwa`.
 
-All add-on commands validate that the current directory already contains the generated base app before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` also validate managed scaffold files before they rewrite providers, routes, env helpers, entrypoint wiring, home-page content, or Vite setup.
+After the NestJS server feature files are generated:
+
+```bash
+npm install
+npm run dev
+```
+
+Then use one of these demo entry points:
+
+- `graphql`: query `graphqlDemo` at `/api/graphql`
+- `queue`: `POST /api/v1/queue/demo`
+- `cache`: `POST /api/v1/cache/demo`
+- `llm`: `POST /api/v1/llm/demo`
+
+All add-on commands validate that the current directory already contains the generated base scaffold before they write anything. `bff` fails clearly if a `server/` folder already exists. `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` validate managed frontend scaffold files before they rewrite providers, routes, env helpers, entrypoint wiring, home-page content, or Vite setup. `graphql`, `queue`, `cache`, and `llm` do the same for the managed NestJS server scaffold before they rewrite `src/server.ts`, env/config files, or `src/modules/app.module.ts`.
 
 ## Local development
 
@@ -434,8 +489,10 @@ The current test suite covers:
 - generation with the explicit `yo t-generator:react-app` command
 - generation with the explicit `yo t-generator:react-add` command
 - generation with the explicit `yo t-generator:nestjs-app` command
+- generation with the explicit `yo t-generator:nestjs-add` command
 - help output for `yo t-generator`
 - prompt-based feature selection for `yo t-generator:react-add`
+- prompt-based feature selection for `yo t-generator:nestjs-add`
 - adding the `bff` feature to an existing generated base app
 - adding the `ui-library` feature to an existing generated base app
 - adding the `auth` feature to an existing generated base app
@@ -443,6 +500,11 @@ The current test suite covers:
 - adding the `react-query` feature to an existing generated base app
 - adding the `apollo` feature to an existing generated base app
 - adding the `pwa` feature to an existing generated base app
+- adding the `graphql` server feature to an existing generated NestJS base app
+- adding the `queue` server feature to an existing generated NestJS base app
+- adding the `cache` server feature to an existing generated NestJS base app
+- adding the `llm` server feature to an existing generated NestJS base app
+- composing `queue` and `cache` without duplicating shared Redis scaffold
 - composing `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` in supported orders
 - the generated base project structure and files
 - absence of feature-specific dependencies in the base
@@ -453,6 +515,7 @@ The current test suite covers:
 - failure when `react-query` is added outside the generated base app
 - failure when `apollo` is added outside the generated base app
 - failure when `pwa` is added outside the generated base app
+- failure when `nestjs-add` is run outside the generated NestJS base app
 - failure when `bff` generation would overwrite existing BFF wiring
 - failure when `ui-library` generation would overwrite existing managed UI wiring
 - failure when `auth` generation would overwrite existing managed auth wiring
@@ -460,4 +523,5 @@ The current test suite covers:
 - failure when `react-query` generation would overwrite existing managed React Query wiring
 - failure when `apollo` generation would overwrite existing managed Apollo wiring
 - failure when `pwa` generation would overwrite existing managed PWA wiring
+- failure when managed NestJS server scaffold files drift before a server feature add
 - failure on non-empty target directories

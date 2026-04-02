@@ -49,8 +49,8 @@ test('adds the apollo feature to an existing generated base app', async () => {
     'src/shared/apollo/ApolloWithAuthProvider.tsx',
   );
 
-  assert.equal(packageJson.dependencies?.['@apollo/client'], '^4.0.7');
-  assert.equal(packageJson.dependencies?.graphql, '^16.11.0');
+  assert.equal(packageJson.dependencies?.['@apollo/client'], '^4.1.6');
+  assert.equal(packageJson.dependencies?.graphql, '^16.13.2');
   assert.equal(packageJson.dependencies?.['@auth0/auth0-react'], undefined);
 
   yoAssert.file([

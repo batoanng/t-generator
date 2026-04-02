@@ -34,6 +34,11 @@ export const nestjsAppGeneratorPath = path.join(
   'nestjs-app',
   `index${generatorExtension}`,
 );
+export const nestjsAddGeneratorPath = path.join(
+  generatorRoot,
+  'nestjs-add',
+  `index${generatorExtension}`,
+);
 
 export function readJson<T = PackageJson>(filePath: string): T {
   return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;

@@ -9,8 +9,8 @@ import { hasPackageDependency } from '../lib/helpers';
 import type { FeatureDefinition } from '../lib/types';
 
 const APOLLO_DEPENDENCIES = {
-  '@apollo/client': '^4.0.7',
-  graphql: '^16.11.0',
+  '@apollo/client': '^4.1.6',
+  graphql: '^16.13.2',
 };
 
 const apolloFeature: FeatureDefinition = {

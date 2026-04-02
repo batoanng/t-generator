@@ -15,6 +15,7 @@ import {
 
 const blockedDependencies = [
   '@apollo/server',
+  '@as-integrations/fastify',
   '@keyv/redis',
   '@langchain/core',
   '@langchain/deepseek',
@@ -193,6 +194,18 @@ test('generates the NestJS base app with the expected project structure', async 
   );
   assert.equal(
     fs.existsSync(path.join(projectRoot, 'src/modules/push')),
+    false,
+  );
+  assert.equal(
+    fs.existsSync(path.join(projectRoot, 'src/modules/cache')),
+    false,
+  );
+  assert.equal(
+    fs.existsSync(path.join(projectRoot, 'src/modules/graphql')),
+    false,
+  );
+  assert.equal(
+    fs.existsSync(path.join(projectRoot, 'src/modules/llm')),
     false,
   );
   assert.equal(fs.existsSync(path.join(projectRoot, 'src/llm')), false);

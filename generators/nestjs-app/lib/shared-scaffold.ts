@@ -50,33 +50,26 @@ const BASE_DEV_DEPENDENCIES: Record<string, string> = {
 };
 
 const GRAPHQL_DEPENDENCIES: Record<string, string> = {
-  '@apollo/server': '^4.12.2',
-  '@nestjs/apollo': '^13.0.3',
-  '@nestjs/graphql': '^13.1.0',
-  graphql: '^16.11.0',
+  '@apollo/server': '^5.5.0',
+  '@as-integrations/fastify': '^3.1.0',
+  '@nestjs/apollo': '^13.2.4',
+  '@nestjs/graphql': '^13.2.4',
+  graphql: '^16.13.2',
 };
 
 const QUEUE_DEPENDENCIES: Record<string, string> = {
-  '@nestjs/bullmq': '^11.0.3',
-  bullmq: '^5.58.9',
+  '@nestjs/bullmq': '^11.0.4',
+  bullmq: '^5.72.1',
 };
 
-const WEB_PUSH_DEPENDENCIES: Record<string, string> = {
-  '@keyv/redis': '^5.1.1',
-  '@nestjs/cache-manager': '^3.0.1',
-  'cache-manager': '^7.2.2',
-  'web-push': '^3.6.7',
-};
-
-const WEB_PUSH_DEV_DEPENDENCIES: Record<string, string> = {
-  '@types/web-push': '^3.6.4',
+const CACHE_DEPENDENCIES: Record<string, string> = {
+  '@keyv/redis': '^5.1.6',
+  '@nestjs/cache-manager': '^3.1.0',
+  'cache-manager': '^7.2.8',
 };
 
 const LLM_DEPENDENCIES: Record<string, string> = {
-  '@langchain/core': '^0.3.68',
-  '@langchain/deepseek': '^0.1.0',
-  '@langchain/openai': '^0.6.9',
-  openai: '^4.62.1',
+  openai: '^6.33.0',
 };
 
 const BASE_CONFIG_FIELDS: ConfigField[] = [
@@ -160,27 +153,6 @@ const REDIS_CONFIG_FIELDS: ConfigField[] = [
   },
 ];
 
-const WEB_PUSH_CONFIG_FIELDS: ConfigField[] = [
-  {
-    name: 'WEB_PUSH_CONTACT',
-    type: 'string',
-    schema: 'urlStringSchema',
-    sample: 'mailto:hello@example.com',
-  },
-  {
-    name: 'WEB_PUSH_PUBLIC_KEY',
-    type: 'string',
-    schema: 'z.string().min(1)',
-    sample: 'public-key',
-  },
-  {
-    name: 'WEB_PUSH_PRIVATE_KEY',
-    type: 'string',
-    schema: 'z.string().min(1)',
-    sample: 'private-key',
-  },
-];
-
 const LLM_CONFIG_FIELDS: ConfigField[] = [
   {
     name: 'OPENAI_API_KEY',
@@ -192,14 +164,7 @@ const LLM_CONFIG_FIELDS: ConfigField[] = [
     name: 'OPENAI_MODEL',
     type: 'string',
     schema: 'z.string().min(1)',
-    sample: 'gpt-5.1',
-  },
-  {
-    name: 'DEEPSEEK_API_KEY',
-    type: 'string',
-    schema: 'optionalStringSchema',
-    sample: 'deepseek-key',
-    optional: true,
+    sample: 'gpt-5',
   },
 ];
 
@@ -228,12 +193,8 @@ function getConfigFields(
 ): ConfigField[] {
   const fields = [...BASE_CONFIG_FIELDS];
 
-  if (features.queue || features.webPush) {
+  if (features.queue || features.cache) {
     fields.push(...REDIS_CONFIG_FIELDS);
-  }
-
-  if (features.webPush) {
-    fields.push(...WEB_PUSH_CONFIG_FIELDS);
   }
 
   if (features.llm) {
@@ -243,10 +204,10 @@ function getConfigFields(
   return fields;
 }
 
-function renderPackageJson(
+export function buildServerPackageJson(
   context: ServerTemplateContext,
   features: InstalledServerFeatures,
-): string {
+): PackageJson {
   const dependencies = [BASE_DEPENDENCIES];
   const devDependencies = [BASE_DEV_DEPENDENCIES];
 
@@ -258,16 +219,15 @@ function renderPackageJson(
     dependencies.push(QUEUE_DEPENDENCIES);
   }
 
-  if (features.webPush) {
-    dependencies.push(WEB_PUSH_DEPENDENCIES);
-    devDependencies.push(WEB_PUSH_DEV_DEPENDENCIES);
+  if (features.cache) {
+    dependencies.push(CACHE_DEPENDENCIES);
   }
 
   if (features.llm) {
     dependencies.push(LLM_DEPENDENCIES);
   }
 
-  const packageJson: PackageJson = {
+  return {
     name: context.appName,
     version: '0.1.0',
     private: true,
@@ -287,8 +247,13 @@ function renderPackageJson(
     dependencies: mergeRecords(...dependencies),
     devDependencies: mergeRecords(...devDependencies),
   };
+}
 
-  return `${JSON.stringify(packageJson, null, 2)}\n`;
+export function renderServerPackageJson(
+  context: ServerTemplateContext,
+  features: InstalledServerFeatures,
+): string {
+  return `${JSON.stringify(buildServerPackageJson(context, features), null, 2)}\n`;
 }
 
 function renderEnvExample(
@@ -445,7 +410,7 @@ function renderQueueImportBlock(): string[] {
   return ["import { BullModule } from '@nestjs/bullmq';"];
 }
 
-function renderWebPushImportBlock(): string[] {
+function renderCacheImportBlock(): string[] {
   return [
     "import { createKeyv } from '@keyv/redis';",
     "import { CacheModule } from '@nestjs/cache-manager';",
@@ -463,8 +428,8 @@ function renderAppModule(features: InstalledServerFeatures): string {
     imports.push(...renderQueueImportBlock());
   }
 
-  if (features.webPush) {
-    imports.push(...renderWebPushImportBlock());
+  if (features.cache) {
+    imports.push(...renderCacheImportBlock());
   }
 
   imports.push(
@@ -472,13 +437,29 @@ function renderAppModule(features: InstalledServerFeatures): string {
     "import { CommonModule } from './common';",
   );
 
-  if (features.queue || features.webPush) {
+  if (features.graphql) {
+    imports.push("import { GraphqlFeatureModule } from './graphql';");
+  }
+
+  if (features.queue) {
+    imports.push("import { QueueFeatureModule } from './queue';");
+  }
+
+  if (features.cache) {
+    imports.push("import { CacheFeatureModule } from './cache';");
+  }
+
+  if (features.llm) {
+    imports.push("import { LlmFeatureModule } from './llm';");
+  }
+
+  if (features.queue || features.cache) {
     imports.push("import { config } from '../types/config';");
   }
 
   const lines = [...imports, ''];
 
-  if (features.webPush) {
+  if (features.cache) {
     lines.push('function toRedisUrl(): string {');
     lines.push('  const username = config.REDIS_USERNAME;');
     lines.push('  const password = config.REDIS_PASSWORD;');
@@ -503,14 +484,26 @@ function renderAppModule(features: InstalledServerFeatures): string {
     lines.push('      driver: ApolloDriver,');
     lines.push('      autoSchemaFile: true,');
     lines.push("      path: '/api/graphql',");
-    lines.push('      context: (req: { raw?: { headers?: Record<string, unknown> } }) => {');
-    lines.push('        const raw = req?.raw ?? req;');
+    lines.push('      context: (requestContext: {');
+    lines.push('        req?: {');
+    lines.push('          raw?: { headers?: Record<string, unknown>; user?: unknown };');
+    lines.push('          headers?: Record<string, unknown>;');
+    lines.push('          user?: unknown;');
+    lines.push('        };');
+    lines.push('        raw?: { headers?: Record<string, unknown>; user?: unknown };');
+    lines.push('        headers?: Record<string, unknown>;');
+    lines.push('        user?: unknown;');
+    lines.push('      }) => {');
+    lines.push(
+      '        const raw = requestContext.req?.raw ?? requestContext.req ?? requestContext.raw ?? requestContext;',
+    );
     lines.push('        const headers = raw?.headers ?? {};');
-    lines.push('');
     lines.push('        return {');
     lines.push('          req: raw,');
     lines.push('          headers,');
-    lines.push("          guestUserId: headers['x-guest-user-id'] ?? null,");
+    lines.push(
+      "          guestUserId: typeof headers['x-guest-user-id'] === 'string' ? headers['x-guest-user-id'] : null,",
+    );
     lines.push('        };');
     lines.push('      },');
     lines.push('    }),');
@@ -527,7 +520,7 @@ function renderAppModule(features: InstalledServerFeatures): string {
     lines.push('    }),');
   }
 
-  if (features.webPush) {
+  if (features.cache) {
     lines.push('    CacheModule.registerAsync({');
     lines.push('      isGlobal: true,');
     lines.push('      useFactory: async () => {');
@@ -540,9 +533,133 @@ function renderAppModule(features: InstalledServerFeatures): string {
     lines.push('    }),');
   }
 
+  if (features.graphql) {
+    lines.push('    GraphqlFeatureModule,');
+  }
+
+  if (features.queue) {
+    lines.push('    QueueFeatureModule,');
+  }
+
+  if (features.cache) {
+    lines.push('    CacheFeatureModule,');
+  }
+
+  if (features.llm) {
+    lines.push('    LlmFeatureModule,');
+  }
+
   lines.push('  ],');
   lines.push('})');
   lines.push('export class ApplicationModule {}');
+
+  return `${lines.join('\n')}\n`;
+}
+
+function renderServerFile(
+  context: ServerTemplateContext,
+  features: InstalledServerFeatures,
+): string {
+  const swaggerDescription = features.graphql
+    ? `REST and GraphQL scaffold for ${context.appDisplayName}. Swagger documents the generated REST endpoints and GraphQL lives at /api/graphql.`
+    : `REST API scaffold for ${context.appDisplayName}. Swagger documents the generated NestJS base endpoints.`;
+
+  const allowedHeaders = ["'Content-Type'", "'Authorization'"];
+
+  if (features.graphql) {
+    allowedHeaders.push("'x-guest-user-id'");
+  }
+
+  const lines = [
+    "import 'reflect-metadata';",
+    '',
+    "import { INestApplication, ValidationPipe } from '@nestjs/common';",
+    "import { NestFactory } from '@nestjs/core';",
+    'import {',
+    '  FastifyAdapter,',
+    '  NestFastifyApplication,',
+    "} from '@nestjs/platform-fastify';",
+    "import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';",
+    '',
+    "import { ApplicationModule } from './modules/app.module';",
+    "import { CommonModule, LogInterceptor } from './modules/common';",
+    "import { config } from './types/config';",
+    '',
+    "const SWAGGER_PREFIX = '/docs';",
+    `const SWAGGER_TITLE = ${JSON.stringify(`${context.appDisplayName} API`)};`,
+    `const SWAGGER_DESCRIPTION = ${JSON.stringify(swaggerDescription)};`,
+    '',
+    'function createSwagger(app: INestApplication): void {',
+    '  const apiVersion = String(config.API_VERSION);',
+    "  const apiBasePath = `/api/v${apiVersion}`;",
+    '  const options = new DocumentBuilder()',
+    '    .setTitle(SWAGGER_TITLE)',
+    '    .setDescription(SWAGGER_DESCRIPTION)',
+    '    .setVersion(apiVersion)',
+    "    .setOpenAPIVersion('3.0.0')",
+    "    .addServer(apiBasePath, 'Versioned REST API base path')",
+    '    .addBearerAuth(',
+    '      {',
+    "        type: 'http',",
+    "        scheme: 'bearer',",
+    "        bearerFormat: 'token',",
+    "        description: 'Health check bearer token.',",
+    '      },',
+    "      'health-token',",
+    '    )',
+    '    .build();',
+    '',
+    '  const document = SwaggerModule.createDocument(app, options);',
+    '  SwaggerModule.setup(SWAGGER_PREFIX, app, document);',
+    '}',
+    '',
+    'async function bootstrap(): Promise<void> {',
+    '  const adapter = new FastifyAdapter();',
+    '  const app = await NestFactory.create<NestFastifyApplication>(',
+    '    ApplicationModule,',
+    '    adapter,',
+    '  );',
+    '',
+    '  app.enableCors({',
+    '    origin:',
+    '      config.CORS_ORIGIN && config.CORS_ORIGIN.length > 0',
+    '        ? config.CORS_ORIGIN',
+    '        : true,',
+    '    credentials: true,',
+    "    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],",
+    `    allowedHeaders: [${allowedHeaders.join(', ')}],`,
+    '  });',
+    '',
+    '  app.setGlobalPrefix(`api/v${config.API_VERSION}`);',
+    '',
+    '  if (config.SWAGGER_ENABLE) {',
+    '    createSwagger(app);',
+    '  }',
+    '',
+    '  app.useGlobalPipes(',
+    '    new ValidationPipe({',
+    '      transform: true,',
+    '      whitelist: true,',
+    '      transformOptions: {',
+    '        enableImplicitConversion: true,',
+    '      },',
+    '    }),',
+    '  );',
+    '',
+    '  const logInterceptor = app.select(CommonModule).get(LogInterceptor);',
+    '  app.useGlobalInterceptors(logInterceptor);',
+    '',
+    '  const port = config.API_PORT;',
+    "  await app.listen(port, '0.0.0.0');",
+    '',
+    '  console.info(`Server is running on port ${port}`);',
+    '}',
+    '',
+    'bootstrap().catch((error: unknown) => {',
+    '  console.error(error);',
+    '  process.exit(1);',
+    '});',
+  ];
 
   return `${lines.join('\n')}\n`;
 }
@@ -552,12 +669,12 @@ export function buildServerSharedScaffold(
   features: InstalledServerFeatures,
 ): Record<string, string> {
   return {
-    'package.json': renderPackageJson(context, features),
     '.env.example': renderEnvExample(context, features),
     'src/types/config.ts': renderConfigType(features),
     'src/modules/common/provider/config.provider.ts': renderConfigProvider(
       features,
     ),
     'src/modules/app.module.ts': renderAppModule(features),
+    'src/server.ts': renderServerFile(context, features),
   };
 }

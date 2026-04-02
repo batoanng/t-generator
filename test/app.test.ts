@@ -266,4 +266,5 @@ test('root generator shows explicit command help without scaffolding files', asy
   assert.match(combinedOutput, /yo t-generator:react-app/);
   assert.match(combinedOutput, /yo t-generator:react-add/);
   assert.match(combinedOutput, /yo t-generator:nestjs-app/);
+  assert.match(combinedOutput, /yo t-generator:nestjs-add/);
 });

@@ -7,5 +7,6 @@ export = class RootGenerator extends GeneratorBase {
     this.log('  yo t-generator:react-app [appName]');
     this.log('  yo t-generator:react-add [featureName]');
     this.log('  yo t-generator:nestjs-app [appName]');
+    this.log('  yo t-generator:nestjs-add [featureName]');
   }
 };

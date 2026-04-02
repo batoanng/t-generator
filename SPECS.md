@@ -2,13 +2,14 @@
 
 ## 1. Overview
 
-`t-generator` is a Yeoman-based code generator for bootstrapping and evolving React repositories.
+`t-generator` is a Yeoman-based code generator for bootstrapping and evolving React repositories and lean NestJS servers.
 
-Its purpose is to help developers create a production-ready React + TypeScript application quickly, then progressively add common features through dedicated commands.
+Its purpose is to help developers create a production-ready React + TypeScript application or a lean NestJS server quickly, then progressively add common features through dedicated commands.
 
 The generator should support:
 
 - creating a base React + TypeScript app
+- creating a base NestJS server
 - adding optional features incrementally
 - adding testing setup for the base app and for each added feature
 - keeping generated code modular, predictable, and easy to maintain
@@ -22,7 +23,9 @@ The initial version should focus on a strong base application and a small set of
 ### Primary goals
 
 - Provide a single command to generate a base React + TypeScript application
+- Provide a single command to generate a base NestJS server
 - Provide separate commands to add common React features on demand
+- Provide separate commands to add common NestJS server features on demand
 - Provide commands to add tests for the base app and each installed feature
 - Ensure generated code follows a clean, scalable project structure
 - Minimize manual setup after generation
@@ -50,7 +53,8 @@ The first version does not need to:
 Notes:
 
 - A lightweight BFF/proxy server is in scope as an optional feature.
-- A full backend application is not in scope.
+- A lean NestJS application scaffold plus infrastructure-oriented add-on features is in scope.
+- A full domain-specific backend application is not in scope.
 
 ---
 
@@ -112,7 +116,9 @@ The exact package names can be configurable in implementation, but the first ver
 Version 1 should focus on two layers:
 
 - a strong `base app`
-- a small set of add-on `features`
+- a small set of add-on React `features`
+- a lean `base server`
+- a small set of add-on NestJS server `features`
 
 The generator should not attempt to cover every possible project concern up front.
 
@@ -190,7 +196,53 @@ Prompt order for the current implementation:
 6. `apollo`
 7. `pwa`
 
-### 7.3 Test command
+### 7.3 NestJS base command
+
+This command creates the initial NestJS server project.
+
+Example:
+
+```bash
+yo t-generator:nestjs-app my-server
+```
+
+Responsibilities:
+
+- scaffold a NestJS + Fastify + Prisma server
+- configure typed env handling with `zod`
+- configure Swagger, auth scaffolding, and health endpoint wiring
+- create the initial `src/modules` structure
+- add a basic Vitest + Fastify injection test
+
+### 7.4 NestJS server feature command
+
+This command adds one server feature into an existing generated NestJS project.
+
+Example:
+
+```bash
+yo t-generator:nestjs-add graphql
+yo t-generator:nestjs-add queue
+yo t-generator:nestjs-add cache
+yo t-generator:nestjs-add llm
+```
+
+Responsibilities:
+
+- install required dependencies
+- create or update required files under `src/modules`
+- wire the feature into existing server config, env handling, and app module setup
+- validate that the target project already contains the generated NestJS base app before writing feature-managed files
+- avoid duplicating existing setup where possible
+
+Prompt order for the current implementation:
+
+1. `graphql`
+2. `queue`
+3. `cache`
+4. `llm`
+
+### 7.5 Test command
 
 This command adds or updates tests for the base app or for a specific feature.
 
@@ -508,6 +560,88 @@ Notes:
 - The feature should work on the base app and also compose with `auth`, `redux`, `react-query`, `apollo`, and `ui-library` in either order.
 - The first version should keep runtime caching conservative and avoid schema-specific or API-specific runtime caching rules.
 
+### 9.9 `graphql`
+
+Purpose:
+
+- add server-side GraphQL support without bringing in domain-specific graph infrastructure
+
+Responsibilities:
+
+- install `@nestjs/graphql`, `@nestjs/apollo`, `@apollo/server`, `@as-integrations/fastify`, and `graphql`
+- add code-first Apollo/Nest GraphQL wiring at `/api/graphql`
+- preserve raw request access in GraphQL context and pass through `x-guest-user-id`
+- generate a self-contained demo resolver and output type
+- keep GraphQL-only guards and decorators inside the GraphQL feature
+- validate existing managed server scaffold files before writing GraphQL changes
+
+Non-responsibilities:
+
+- no `GraphRepository`
+- no Neo4j indexes or providers
+- no `atomsByArtifact` resolver
+
+### 9.10 `queue`
+
+Purpose:
+
+- add generic Redis-backed queue infrastructure
+
+Responsibilities:
+
+- install BullMQ support
+- add shared Redis env fields and Bull root config
+- register one generic demo queue
+- generate queue constants, a zod-backed request schema, and a producer/controller demo
+- validate existing managed server scaffold files before writing queue changes
+
+Non-responsibilities:
+
+- no processors or workers
+- no Prisma-backed job creation
+- no crawl- or document-specific env naming
+
+### 9.11 `cache`
+
+Purpose:
+
+- add generic Redis-backed cache infrastructure
+
+Responsibilities:
+
+- install cache-manager plus Redis store support
+- add shared Redis env fields
+- generate a zod-backed cache demo schema, controller, and service
+- register `CacheModule` with Redis-backed storage
+- validate existing managed server scaffold files before writing cache changes
+
+Non-responsibilities:
+
+- no Prisma dependency
+- no GraphQL dependency
+- no push notification dependency
+
+### 9.12 `llm`
+
+Purpose:
+
+- add a minimal provider-client and prompt-chain entry point for LLM usage
+
+Responsibilities:
+
+- install the OpenAI SDK
+- add `OPENAI_API_KEY` and `OPENAI_MODEL`
+- generate provider client wiring plus a zod-backed demo endpoint
+- keep the first version focused on a minimal prompt-chain example
+- validate existing managed server scaffold files before writing LLM changes
+
+Non-responsibilities:
+
+- no Neo4j history
+- no vector retrieval or embeddings config
+- no encrypted chat payloads
+- no document extraction
+
 ---
 
 ## 10. Feature composition rules
@@ -534,6 +668,7 @@ Feature generators should compose cleanly.
 - `apollo` must compose cleanly with `auth`, `redux`, `react-query`, and `ui-library`
 - `pwa` must compose cleanly with `auth`, `redux`, `react-query`, `apollo`, and `ui-library`
 - `pwa` should not disrupt `bff` scripts or server scaffolding
+- `queue` and `cache` must compose without duplicating shared Redis env or root config
 - `notifications` may extend the provider tree created by `ui-library`
 - `bff` may add scripts without disrupting existing frontend scripts
 
@@ -564,6 +699,10 @@ Examples:
 - `pwa`: app-shell status wiring, `vite-plugin-pwa` config, and `/pwa` page smoke test
 - `redux`: store or slice smoke test
 - `bff`: server boot or config smoke test where practical
+- `graphql`: generated resolver, app module wiring, and `/api/graphql` config smoke test
+- `queue`: Bull root config, queue registration, and demo controller smoke test
+- `cache`: cache wiring, demo controller/service, and Redis registration smoke test
+- `llm`: OpenAI client wiring and demo endpoint smoke test
 
 ### Repository CI
 
@@ -619,5 +758,9 @@ The first implementation pass should prioritize:
 6. react-query
 7. apollo
 8. pwa
+9. graphql
+10. queue
+11. cache
+12. llm
 
 The remaining features can follow after the core generation flow is stable.

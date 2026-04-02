@@ -7,6 +7,7 @@ import yoAssert from 'yeoman-assert';
 import type { PackageJson } from '../generators/lib/types';
 import {
   createYeomanTestHelpers,
+  nestjsAddGeneratorPath,
   nestjsAppGeneratorPath,
   reactAddGeneratorPath,
   reactAppGeneratorPath,
@@ -35,7 +36,7 @@ distSmokeTest(
       path.join(distRoot, 'generators/react-add/index.js'),
       path.join(distRoot, 'generators/react-add/templates/auth/_env.example.ejs'),
       path.join(distRoot, 'generators/nestjs-app/index.js'),
-      path.join(distRoot, 'generators/nestjs-app/templates/src/server.ts.ejs'),
+      path.join(distRoot, 'generators/nestjs-add/index.js'),
       path.join(
         distRoot,
         'generators/react-add/templates/apollo/src/shared/apollo/ApolloWithAuthProvider.tsx.ejs',
@@ -114,7 +115,7 @@ distSmokeTest(
     ]);
 
     let nestTmpDir = '';
-    await helpers
+    const nestRunResult = await helpers
       .run(nestjsAppGeneratorPath)
       .inTmpDir((directory) => {
         nestTmpDir = directory;
@@ -125,6 +126,20 @@ distSmokeTest(
       path.join(nestTmpDir, 'dist-nest/package.json'),
       path.join(nestTmpDir, 'dist-nest/src/server.ts'),
       path.join(nestTmpDir, 'dist-nest/prisma/schema.prisma'),
+    ]);
+
+    await nestRunResult
+      .create(
+        nestjsAddGeneratorPath,
+        { cwd: path.join(nestTmpDir, 'dist-nest'), tmpdir: false },
+        undefined,
+      )
+      .withArguments(['queue'])
+      .run();
+
+    yoAssert.file([
+      path.join(nestTmpDir, 'dist-nest/src/modules/queue/queue.module.ts'),
+      path.join(nestTmpDir, 'dist-nest/src/modules/queue/queue.service.ts'),
     ]);
   },
 );

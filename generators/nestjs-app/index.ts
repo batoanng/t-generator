@@ -4,7 +4,10 @@ import path from 'node:path';
 import GeneratorBase from 'yeoman-generator';
 
 import type { TemplateContext } from '../lib/types';
-import { buildServerSharedScaffold } from './lib/shared-scaffold';
+import {
+  buildServerPackageJson,
+  buildServerSharedScaffold,
+} from './lib/shared-scaffold';
 
 interface NestAppGeneratorOptions extends GeneratorBase.GeneratorOptions {
   appName?: string;
@@ -123,7 +126,6 @@ export = class NestAppGenerator extends GeneratorBase {
       ['prettier.config.js.ejs', 'prettier.config.js'],
       ['_gitignore.ejs', '.gitignore'],
       ['prisma/schema.prisma.ejs', 'prisma/schema.prisma'],
-      ['src/server.ts.ejs', 'src/server.ts'],
       ['src/modules/common/common.module.ts.ejs', 'src/modules/common/common.module.ts'],
       ['src/modules/common/index.ts.ejs', 'src/modules/common/index.ts'],
       ['src/modules/common/controller/index.ts.ejs', 'src/modules/common/controller/index.ts'],
@@ -148,10 +150,24 @@ export = class NestAppGenerator extends GeneratorBase {
       );
     });
 
+    this.fs.write(
+      this.destinationPath('package.json'),
+      `${JSON.stringify(
+        buildServerPackageJson(templateContext, {
+          graphql: false,
+          queue: false,
+          cache: false,
+          llm: false,
+        }),
+        null,
+        2,
+      )}\n`,
+    );
+
     const sharedScaffold = buildServerSharedScaffold(templateContext, {
       graphql: false,
       queue: false,
-      webPush: false,
+      cache: false,
       llm: false,
     });
 
