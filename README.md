@@ -46,6 +46,32 @@ yo t-generator:nestjs-add cache
 yo t-generator:nestjs-add llm
 ```
 
+## Using the published npm package
+
+Global install:
+
+```bash
+npm install -g yo generator-t-generator
+yo t-generator:react-app my-app
+yo t-generator:nestjs-app my-server
+```
+
+Add features after `cd` into the generated project:
+
+```bash
+yo t-generator:react-add auth
+yo t-generator:nestjs-add graphql
+```
+
+Without a global install:
+
+```bash
+npx -p yo -p generator-t-generator yo t-generator:react-app my-app
+npx -p yo -p generator-t-generator yo t-generator:nestjs-app my-server
+```
+
+The npm package page README is sourced from this file and copied into the staged publish directory during `npm run build` and `npm run release`.
+
 ## What the generators create today
 
 ### React base
@@ -475,54 +501,3 @@ What happens next:
 - the release workflow opens or updates a Changesets release PR on `main`
 - when that release PR is merged, the same workflow publishes the package to npm automatically
 - `GITHUB_TOKEN` is provided by GitHub automatically, so you only need to manage `NPM_TOKEN`
-
-Re-link the generator after local changes if needed:
-
-```bash
-npm link
-```
-
-The current test suite covers:
-
-- generation with an explicit app name
-- prompt fallback when the name is omitted
-- generation with the explicit `yo t-generator:react-app` command
-- generation with the explicit `yo t-generator:react-add` command
-- generation with the explicit `yo t-generator:nestjs-app` command
-- generation with the explicit `yo t-generator:nestjs-add` command
-- help output for `yo t-generator`
-- prompt-based feature selection for `yo t-generator:react-add`
-- prompt-based feature selection for `yo t-generator:nestjs-add`
-- adding the `bff` feature to an existing generated base app
-- adding the `ui-library` feature to an existing generated base app
-- adding the `auth` feature to an existing generated base app
-- adding the `redux` feature to an existing generated base app
-- adding the `react-query` feature to an existing generated base app
-- adding the `apollo` feature to an existing generated base app
-- adding the `pwa` feature to an existing generated base app
-- adding the `graphql` server feature to an existing NestJS server project
-- adding the `queue` server feature to an existing NestJS server project
-- adding the `cache` server feature to an existing NestJS server project
-- adding the `llm` server feature to an existing NestJS server project
-- composing `queue` and `cache` without duplicating shared Redis scaffold
-- composing `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` in supported orders
-- the generated base project structure and files
-- absence of feature-specific dependencies in the base
-- failure when `bff` is added outside the generated base app
-- failure when `ui-library` is added outside the generated base app
-- failure when `auth` is added outside the generated base app
-- failure when `redux` is added outside the generated base app
-- failure when `react-query` is added outside the generated base app
-- failure when `apollo` is added outside the generated base app
-- failure when `pwa` is added outside the generated base app
-- failure when `nestjs-add` is run outside a NestJS server project
-- recreating missing shared NestJS scaffold files during a server feature add
-- failure when `bff` generation would overwrite existing BFF wiring
-- failure when `ui-library` generation would overwrite existing managed UI wiring
-- failure when `auth` generation would overwrite existing managed auth wiring
-- failure when `redux` generation would overwrite existing managed Redux wiring
-- failure when `react-query` generation would overwrite existing managed React Query wiring
-- failure when `apollo` generation would overwrite existing managed Apollo wiring
-- failure when `pwa` generation would overwrite existing managed PWA wiring
-- failure when managed NestJS server scaffold files drift before a server feature add
-- failure on non-empty target directories

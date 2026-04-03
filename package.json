@@ -1,6 +1,6 @@
 {
   "name": "generator-t-generator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Yeoman generators for bootstrapping React apps and lean NestJS servers.",
   "type": "commonjs",
   "main": "generators/index.ts",

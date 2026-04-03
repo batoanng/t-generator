@@ -12,6 +12,7 @@ import {
   reactAddGeneratorPath,
   reactAppGeneratorPath,
   readJson,
+  readText,
 } from './helpers';
 
 const distSmokeTest = process.env.DIST_SMOKE === '1' ? test : test.skip;
@@ -58,6 +59,10 @@ distSmokeTest(
 
     assert.equal(distPackageJson.main, 'generators/index.js');
     assert.deepEqual(distPackageJson.files, ['generators', 'README.md']);
+    assert.match(
+      readText(path.join(distRoot, 'README.md')),
+      /## Using the published npm package/,
+    );
 
     let tmpDir = '';
     const helpers = await createYeomanTestHelpers();
