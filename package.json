@@ -23,7 +23,7 @@
     "changeset": "changeset",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"generators/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.ts\"",
-    "test": "tsx --test \"test/**/*.test.ts\"",
+    "test": "tsx --test test/*.test.ts",
     "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json && tsx scripts/stage-dist.ts",
     "test:dist": "npm run build && DIST_SMOKE=1 TEST_TARGET=dist tsx --test \"test/dist-package.test.ts\"",
     "version-packages": "changeset version",
