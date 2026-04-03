@@ -500,10 +500,10 @@ The current test suite covers:
 - adding the `react-query` feature to an existing generated base app
 - adding the `apollo` feature to an existing generated base app
 - adding the `pwa` feature to an existing generated base app
-- adding the `graphql` server feature to an existing generated NestJS base app
-- adding the `queue` server feature to an existing generated NestJS base app
-- adding the `cache` server feature to an existing generated NestJS base app
-- adding the `llm` server feature to an existing generated NestJS base app
+- adding the `graphql` server feature to an existing NestJS server project
+- adding the `queue` server feature to an existing NestJS server project
+- adding the `cache` server feature to an existing NestJS server project
+- adding the `llm` server feature to an existing NestJS server project
 - composing `queue` and `cache` without duplicating shared Redis scaffold
 - composing `ui-library`, `auth`, `redux`, `react-query`, `apollo`, and `pwa` in supported orders
 - the generated base project structure and files
@@ -515,7 +515,8 @@ The current test suite covers:
 - failure when `react-query` is added outside the generated base app
 - failure when `apollo` is added outside the generated base app
 - failure when `pwa` is added outside the generated base app
-- failure when `nestjs-add` is run outside the generated NestJS base app
+- failure when `nestjs-add` is run outside a NestJS server project
+- recreating missing shared NestJS scaffold files during a server feature add
 - failure when `bff` generation would overwrite existing BFF wiring
 - failure when `ui-library` generation would overwrite existing managed UI wiring
 - failure when `auth` generation would overwrite existing managed auth wiring

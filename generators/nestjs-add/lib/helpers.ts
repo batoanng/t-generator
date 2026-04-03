@@ -50,3 +50,14 @@ export function hasPackageDependency(
     typeof packageJson.devDependencies?.[dependencyName] === 'string'
   );
 }
+
+export function hasNestJsDependency(packageJson: PackageJson): boolean {
+  const dependencyNames = [
+    ...Object.keys(packageJson.dependencies || {}),
+    ...Object.keys(packageJson.devDependencies || {}),
+  ];
+
+  return dependencyNames.some((dependencyName) =>
+    dependencyName.startsWith('@nestjs/'),
+  );
+}

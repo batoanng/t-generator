@@ -10,8 +10,8 @@ import cacheFeature from './features/cache';
 import graphqlFeature from './features/graphql';
 import llmFeature from './features/llm';
 import queueFeature from './features/queue';
-import { REQUIRED_BASE_FILES, REQUIRED_BASE_SCRIPTS } from './lib/constants';
 import {
+  hasNestJsDependency,
   normalizeFeatureName,
   normalizeLineEndings,
   readJson,
@@ -157,7 +157,7 @@ export = class NestAddGenerator
 
     if (!fs.existsSync(this.packageJsonPath)) {
       throw new Error(
-        `${featureLabel} can only be generated inside a t-generator NestJS base app. Missing package.json at the project root.`,
+        `${featureLabel} can only be generated inside a NestJS server project. Missing package.json at the project root.`,
       );
     }
 
@@ -169,30 +169,13 @@ export = class NestAddGenerator
       const message = error instanceof Error ? error.message : String(error);
 
       throw new Error(
-        `${featureLabel} can only be generated inside a t-generator NestJS base app. Unable to read package.json: ${message}`,
+        `${featureLabel} can only be generated inside a NestJS server project. Unable to read package.json: ${message}`,
       );
     }
 
-    const missingScripts = REQUIRED_BASE_SCRIPTS.filter(
-      (scriptName) => typeof packageJson.scripts?.[scriptName] !== 'string',
-    );
-    const missingFiles = REQUIRED_BASE_FILES.filter(
-      (relativePath) => !fs.existsSync(this.destinationPath(relativePath)),
-    );
-
-    if (missingScripts.length > 0 || missingFiles.length > 0) {
-      const details: string[] = [];
-
-      if (missingScripts.length > 0) {
-        details.push(`missing scripts: ${missingScripts.join(', ')}`);
-      }
-
-      if (missingFiles.length > 0) {
-        details.push(`missing files: ${missingFiles.join(', ')}`);
-      }
-
+    if (!hasNestJsDependency(packageJson)) {
       throw new Error(
-        `${featureLabel} can only be generated inside a t-generator NestJS base app. ${details.join('; ')}.`,
+        `${featureLabel} can only be generated inside a NestJS server project. package.json must declare at least one @nestjs dependency.`,
       );
     }
 
@@ -213,20 +196,16 @@ export = class NestAddGenerator
     features: InstalledServerFeatures,
   ): void {
     const expectedFiles = buildServerSharedScaffold(this.templateContext, features);
-    const missingManagedFiles = Object.keys(expectedFiles).filter(
-      (filePath) => !fs.existsSync(this.destinationPath(filePath)),
-    );
-
-    if (missingManagedFiles.length > 0) {
-      throw new Error(
-        `${featureLabel} generation aborted because required scaffold files are missing: ${missingManagedFiles.join(', ')}.`,
-      );
-    }
-
     const modifiedManagedFiles = Object.entries(expectedFiles)
       .filter(([filePath, expectedContent]) => {
+        const absolutePath = this.destinationPath(filePath);
+
+        if (!fs.existsSync(absolutePath)) {
+          return false;
+        }
+
         const currentContent = normalizeLineEndings(
-          fs.readFileSync(this.destinationPath(filePath), 'utf8'),
+          fs.readFileSync(absolutePath, 'utf8'),
         );
 
         return currentContent !== normalizeLineEndings(expectedContent);

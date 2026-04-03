@@ -77,6 +77,20 @@ test('adds the graphql feature to an existing generated NestJS base app', async 
     path.join(projectRoot, 'src/server.ts'),
     "'x-guest-user-id'",
   );
+  yoAssert.fileContent(
+    path.join(
+      projectRoot,
+      'src/modules/graphql/security/gql-optional-auth.guard.ts',
+    ),
+    'handleRequest<TUser = { sub?: string } | null>(',
+  );
+  yoAssert.fileContent(
+    path.join(
+      projectRoot,
+      'src/modules/graphql/security/gql-optional-auth.guard.ts',
+    ),
+    'return null as TUser;',
+  );
   yoAssert.fileContent(resolverPath, "name: 'graphqlDemo'");
   yoAssert.fileContent(resolverPath, 'authenticated: Boolean(currentUser.user?.sub)');
   yoAssert.fileContent(resolverPath, 'service: "starter-graphql"');

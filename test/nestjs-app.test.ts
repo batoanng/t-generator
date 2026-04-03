@@ -92,6 +92,7 @@ test('generates the NestJS base app with the expected project structure', async 
 
   [
     '@fastify/cors',
+    '@fastify/static',
     '@nestjs/common',
     '@nestjs/core',
     '@nestjs/passport',
@@ -100,6 +101,8 @@ test('generates the NestJS base app with the expected project structure', async 
     '@nestjs/testing',
     '@nestjs/terminus',
     '@prisma/client',
+    'class-transformer',
+    'class-validator',
     'fastify',
     'jwks-rsa',
     'passport',

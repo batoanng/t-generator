@@ -232,7 +232,7 @@ Responsibilities:
 - install required dependencies
 - create or update required files under `src/modules`
 - wire the feature into existing server config, env handling, and app module setup
-- validate that the target project already contains the generated NestJS base app before writing feature-managed files
+- validate that the target project is a NestJS server project before writing feature-managed files
 - avoid duplicating existing setup where possible
 
 Prompt order for the current implementation:

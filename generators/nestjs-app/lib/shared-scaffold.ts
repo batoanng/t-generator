@@ -14,6 +14,7 @@ interface ConfigField {
 
 const BASE_DEPENDENCIES: Record<string, string> = {
   '@fastify/cors': '^11.2.0',
+  '@fastify/static': '^9.0.0',
   '@nestjs/common': '^11.1.6',
   '@nestjs/core': '^11.1.6',
   '@nestjs/passport': '^11.0.5',
@@ -21,6 +22,8 @@ const BASE_DEPENDENCIES: Record<string, string> = {
   '@nestjs/swagger': '^11.2.0',
   '@nestjs/terminus': '^11.0.0',
   '@prisma/client': '^6.16.2',
+  'class-transformer': '^0.5.1',
+  'class-validator': '^0.15.1',
   'fastify': '^5.6.0',
   'jwks-rsa': '^3.2.0',
   'passport': '^0.7.0',
