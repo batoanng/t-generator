@@ -51,7 +51,7 @@ yo t-generator:nestjs-add llm
 Global install:
 
 ```bash
-npm install -g yo generator-t-generator
+npm install -g yo @batoanng/t-generator
 yo t-generator:react-app my-app
 yo t-generator:nestjs-app my-server
 ```
@@ -66,8 +66,8 @@ yo t-generator:nestjs-add graphql
 Without a global install:
 
 ```bash
-npx -p yo -p generator-t-generator yo t-generator:react-app my-app
-npx -p yo -p generator-t-generator yo t-generator:nestjs-app my-server
+npx -p yo -p @batoanng/t-generator yo t-generator:react-app my-app
+npx -p yo -p @batoanng/t-generator yo t-generator:nestjs-app my-server
 ```
 
 The npm package page README is sourced from this file and copied into the staged publish directory during `npm run build` and `npm run release`.

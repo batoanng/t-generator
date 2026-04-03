@@ -1,6 +1,6 @@
 # Changesets
 
-This folder stores release notes for `generator-t-generator`.
+This folder stores release notes for `@batoanng/t-generator`.
 
 - Run `npm run changeset` to create a new changeset file for user-facing changes.
 - Run `npm run version-packages` to apply pending changesets to `package.json` and `CHANGELOG.md`.

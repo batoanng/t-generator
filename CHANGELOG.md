@@ -1,4 +1,4 @@
-# generator-t-generator
+# @batoanng/t-generator
 
 ## 0.2.0
 
